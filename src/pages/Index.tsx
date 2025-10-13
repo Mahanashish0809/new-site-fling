@@ -1,29 +1,12 @@
 import { useState } from "react";
-import { SearchBar } from "@/components/SearchBar";
+import { Header } from "@/components/Header";
 import { JobCard } from "@/components/JobCard";
 import { FilterSidebar } from "@/components/FilterSidebar";
 import { sampleJobs } from "@/data/sampleJobs";
 import { Briefcase, TrendingUp, Users, Zap } from "lucide-react";
 
 const Index = () => {
-  const [filteredJobs, setFilteredJobs] = useState(sampleJobs);
-
-  const handleSearch = (keyword: string, location: string) => {
-    const filtered = sampleJobs.filter((job) => {
-      const matchesKeyword = keyword
-        ? job.title.toLowerCase().includes(keyword.toLowerCase()) ||
-          job.company.toLowerCase().includes(keyword.toLowerCase()) ||
-          job.description.toLowerCase().includes(keyword.toLowerCase())
-        : true;
-      
-      const matchesLocation = location
-        ? job.location.toLowerCase().includes(location.toLowerCase())
-        : true;
-
-      return matchesKeyword && matchesLocation;
-    });
-    setFilteredJobs(filtered);
-  };
+  const [filteredJobs] = useState(sampleJobs);
 
   const handleFilterChange = (filters: any) => {
     // Filter logic will be implemented here
@@ -32,6 +15,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
+      
       {/* Hero Section */}
       <section className="bg-gradient-hero text-white py-20 px-4">
         <div className="container mx-auto">
@@ -43,7 +28,6 @@ const Index = () => {
               Discover opportunities from thousands of companies worldwide
             </p>
           </div>
-          <SearchBar onSearch={handleSearch} />
           
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 max-w-4xl mx-auto">
