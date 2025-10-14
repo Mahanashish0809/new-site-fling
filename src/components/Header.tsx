@@ -7,9 +7,8 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { Menu } from "lucide-react";
+import { Menu, Search, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
-import joltqLogo from "@/assets/joltq-logo.png";
 
 export const Header = () => {
   return (
@@ -18,7 +17,10 @@ export const Header = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1 group">
           <span className="text-3xl font-bold text-[#0A2540] dark:text-white transition-colors">Jolt</span>
-          <img src={joltqLogo} alt="Q" className="h-8 w-8" />
+          <div className="relative h-8 w-8">
+            <Search className="h-8 w-8 text-[#FF6B35]" />
+            <Zap className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-[#FFD700] fill-[#FFD700]" />
+          </div>
         </Link>
 
         {/* Navigation Menu */}
