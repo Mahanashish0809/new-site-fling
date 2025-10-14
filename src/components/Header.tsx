@@ -58,6 +58,18 @@ export const Header = () => {
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
+                <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/About"
+                    className="text-[15px] font-medium text-[#0A2540] dark:text-white transition-colors hover:text-[#FF6B35] hover:underline underline-offset-4"
+                  >
+                    About Us
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
