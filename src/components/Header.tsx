@@ -18,8 +18,8 @@ export const Header = () => {
         <Link to="/" className="flex items-center gap-1 group">
           <span className="text-3xl font-bold text-[#0A2540] dark:text-white transition-colors">Jolt</span>
           <div className="relative h-8 w-8">
-            <Search className="h-8 w-8 text-[#FF6B35]" />
-            <Zap className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-[#FFD700] fill-[#FFD700]" />
+            <Search className="h-8 w-8 text-black dark:text-white" strokeWidth={2.5} />
+            <Zap className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5 text-white fill-white drop-shadow-lg" strokeWidth={2} />
           </div>
         </Link>
 
