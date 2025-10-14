@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Menu } from "lucide-react";
 import { Link } from "react-router-dom";
+import joltqLogo from "@/assets/joltq-logo.png";
 
 export const Header = () => {
   return (
@@ -16,7 +17,7 @@ export const Header = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="text-2xl font-bold text-primary">JobHub</div>
+          <img src={joltqLogo} alt="JoltQ - The Cutting Edge Job Search" className="h-12" />
         </Link>
 
         {/* Navigation Menu */}
