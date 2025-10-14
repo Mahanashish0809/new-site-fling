@@ -1,89 +1,83 @@
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { Menu, Search, Zap } from "lucide-react";
+import { Search, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const Header = () => {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-1 group">
-          <span className="text-3xl font-bold text-[#0A2540] dark:text-white transition-colors">Jolt</span>
-          <div className="relative h-8 w-8">
-            <Search className="h-8 w-8 text-[#FF6B35]" strokeWidth={2.5} fill="black" />
-            <Zap className="absolute top-[8px] left-[8px] h-3.5 w-3.5 text-white fill-white" strokeWidth={2} />
-          </div>
-        </Link>
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-gray-900/80">
+      <div className="container mx-auto flex h-16 items-center justify-between px-6">
+        
+        {/* Logo + Navigation Row */}
+        <div className="flex items-center gap-10">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-1 group">
+            <span className="text-4xl font-extrabold text-[#0A2540] dark:text-white transition-colors leading-none group-hover:text-[#FF6B35]">
+              Jolt
+            </span>
+            <div className="relative h-10 w-10 transition-transform duration-200 group-hover:scale-105">
+              <Search
+                className="h-10 w-10 text-[#FF6B35]"
+                strokeWidth={2.5}
+                fill="black"
+              />
+              <Zap
+                className="absolute top-[10px] left-[10px] h-4 w-4 text-white fill-white"
+                strokeWidth={2}
+              />
+            </div>
+          </Link>
 
-        {/* Navigation Menu */}
-        <NavigationMenu className="hidden md:flex">
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>
-                <Menu className="w-4 h-4 mr-2" />
-                Menu
-              </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid w-[200px] gap-3 p-4">
-                  <li>
-                    <NavigationMenuLink asChild>
-                      <a
-                        href="/features"
-                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                      >
-                        <div className="text-sm font-medium leading-none">Features</div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Explore our platform features
-                        </p>
-                      </a>
-                    </NavigationMenuLink>
-                  </li>
-                  <li>
-                    <NavigationMenuLink asChild>
-                      <a
-                        href="/contact"
-                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                      >
-                        <div className="text-sm font-medium leading-none">Contact Us</div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Get in touch with our team
-                        </p>
-                      </a>
-                    </NavigationMenuLink>
-                  </li>
-                  <li>
-                    <NavigationMenuLink asChild>
-                      <a
-                        href="/help"
-                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                      >
-                        <div className="text-sm font-medium leading-none">Help</div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Find answers to your questions
-                        </p>
-                      </a>
-                    </NavigationMenuLink>
-                  </li>
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+          {/* Navigation Links */}
+          <NavigationMenu>
+            <NavigationMenuList className="flex items-center gap-8">
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/features"
+                    className="text-[15px] font-medium text-[#0A2540] dark:text-white transition-colors hover:text-[#FF6B35] hover:underline underline-offset-4"
+                  >
+                    Features
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/contact"
+                    className="text-[15px] font-medium text-[#0A2540] dark:text-white transition-colors hover:text-[#FF6B35] hover:underline underline-offset-4"
+                  >
+                    Contact Us
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    to="/help"
+                    className="text-[15px] font-medium text-[#0A2540] dark:text-white transition-colors hover:text-[#FF6B35] hover:underline underline-offset-4"
+                  >
+                    Help
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
 
         {/* Auth Buttons */}
         <div className="flex items-center gap-3">
           <Button variant="ghost" asChild>
             <Link to="/login">Login</Link>
           </Button>
-          <Button asChild>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
             <Link to="/signup">Sign Up</Link>
           </Button>
         </div>
