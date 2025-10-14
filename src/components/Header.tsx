@@ -16,8 +16,9 @@ export const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <img src={joltqLogo} alt="JoltQ - The Cutting Edge Job Search" className="h-12" />
+        <Link to="/" className="flex items-center gap-1 group">
+          <span className="text-3xl font-bold text-[#0A2540] dark:text-white transition-colors">Jolt</span>
+          <span className="text-3xl font-bold text-[#FF6B35] transition-colors">Q</span>
         </Link>
 
         {/* Navigation Menu */}

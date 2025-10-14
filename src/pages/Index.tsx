@@ -10,9 +10,18 @@ const Index = () => {
       <section className="bg-gradient-hero text-white py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4">
+            <div className="mb-6">
+              <h1 className="text-6xl md:text-7xl font-bold mb-2 tracking-tight">
+                <span className="text-[#0A2540]">Jolt</span>
+                <span className="text-[#FF6B35]">Q</span>
+              </h1>
+              <p className="text-lg md:text-xl text-white/90 font-medium">
+                The Cutting Edge Job Search
+              </p>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 mt-8">
               Find Your Dream Job
-            </h1>
+            </h2>
             <p className="text-xl md:text-2xl text-white/90 mb-8">
               Discover opportunities from thousands of companies worldwide
             </p>
