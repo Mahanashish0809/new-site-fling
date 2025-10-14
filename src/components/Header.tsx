@@ -18,7 +18,7 @@ export const Header = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1 group">
           <span className="text-3xl font-bold text-[#0A2540] dark:text-white transition-colors">Jolt</span>
-          <span className="text-3xl font-bold text-[#FF6B35] transition-colors">Q</span>
+          <img src={joltqLogo} alt="Q" className="h-8 w-8" />
         </Link>
 
         {/* Navigation Menu */}
@@ -31,6 +31,19 @@ export const Header = () => {
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid w-[200px] gap-3 p-4">
+                  <li>
+                    <NavigationMenuLink asChild>
+                      <a
+                        href="/features"
+                        className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                      >
+                        <div className="text-sm font-medium leading-none">Features</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Explore our platform features
+                        </p>
+                      </a>
+                    </NavigationMenuLink>
+                  </li>
                   <li>
                     <NavigationMenuLink asChild>
                       <a
