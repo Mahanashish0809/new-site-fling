@@ -104,10 +104,10 @@ export const Header = () => {
 
         {/* Auth Buttons */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild>
+          <Button variant="ghost" asChild className="text-black bg-transparent hover:text-white hover:bg-green-600 dark:text-white dark:hover:bg-green-600">
             <Link to="/login">Login</Link>
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
+         <Button asChild className="bg-blue-600 hover:bg-blue-700 text-black hover:text-black">
             <Link to="/signup">Sign Up</Link>
           </Button>
         </div>
@@ -115,3 +115,4 @@ export const Header = () => {
     </header>
   );
 };
+
