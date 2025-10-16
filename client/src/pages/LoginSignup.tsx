@@ -19,24 +19,34 @@ const LoginSignup: React.FC = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const endpoint = isLogin ? "/api/login" : "/api/signup";
+  // Inside handleSubmit()
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const endpoint = isLogin ? "/api/login" : "/api/signup";
 
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      alert(data.message || (isLogin ? "Logged in!" : "Signed up!"));
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || "Request failed");
+
+    if (isLogin) {
+      alert("Logged in successfully!");
       navigate("/");
-    } catch (error) {
-      alert("Something went wrong.");
-      console.error(error);
+    } else {
+      // After signup → redirect to OTP page with email
+      navigate("/otp", { state: { email: form.email } });
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Something went wrong!");
+  }
+};
+
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-white">

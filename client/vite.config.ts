@@ -5,6 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  root: '.',            // or 'client' if vite.config.ts is outside
   server: {
     host: "::",
     port: 8080,
