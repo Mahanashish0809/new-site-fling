@@ -12,11 +12,11 @@ const Index = () => {
           <div className="text-center mb-12">
             <div className="mb-6">
               <h1 className="text-6xl md:text-7xl font-bold mb-2 tracking-tight">
-                <span className="text-[#0A2540]">Jolt</span>
-                <span className="text-[#FF6B35]">Q</span>
+                <span className="text-[#0A2540]"></span>
+                <span className="text-[#FF6B35]"></span>
               </h1>
               <p className="text-lg md:text-xl text-white/90 font-medium">
-                The Cutting Edge Job Search
+              
               </p>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 mt-8">

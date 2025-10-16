@@ -4,6 +4,8 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+   NavigationMenuTrigger,
+  NavigationMenuContent,
 } from "@/components/ui/navigation-menu";
 import { Search, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -36,15 +38,31 @@ export const Header = () => {
           {/* Navigation Links */}
           <NavigationMenu>
             <NavigationMenuList className="flex items-center gap-8">
+              {/* Features with Dropdown */}
               <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link
-                    to="/features"
-                    className="text-[15px] font-medium text-[#0A2540] dark:text-white transition-colors hover:text-[#FF6B35] hover:underline underline-offset-4"
-                  >
-                    Features
-                  </Link>
-                </NavigationMenuLink>
+                <NavigationMenuTrigger className="text-[15px] font-medium text-[#0A2540] dark:text-white hover:text-[#FF6B35] transition-colors">
+                  Features
+                </NavigationMenuTrigger>
+                <NavigationMenuContent className="bg-white dark:bg-gray-800 p-4 rounded shadow-lg">
+                  <ul className="flex flex-col gap-2 min-w-[180px]">
+                    <li>
+                      <Link
+                        to="/features/performance"
+                        className="block text-sm text-[#0A2540] dark:text-white hover:text-[#FF6B35] transition-colors"
+                      >
+                        Performance
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/features/pathly"
+                        className="block text-sm text-[#0A2540] dark:text-white hover:text-[#FF6B35] transition-colors"
+                      >
+                        Pathly
+                      </Link>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
