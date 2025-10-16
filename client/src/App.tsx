@@ -8,6 +8,7 @@ import JobDetail from "./pages/JobDetail";
 import NotFound from "./pages/NotFound";
 import LoginSignup from "./pages/LoginSignup";
 import OtpPage from "./pages/OtpPage";
+import JobPage from "./pages/JobPage";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/login" element={<LoginSignup />} />
           <Route path="/signup" element={<LoginSignup />} />
           <Route path="/otp" element={<OtpPage />} />
+          <Route path="/jobPage" element={<JobPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
