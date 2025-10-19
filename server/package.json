@@ -3,5 +3,8 @@
     "@prisma/client": "^6.17.1",
     "pg": "^8.16.3",
     "prisma": "^6.17.1"
+  },
+  "scripts": {
+    "seed": "prisma db seed"
   }
 }
