@@ -4,17 +4,22 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-   NavigationMenuTrigger,
+  NavigationMenuTrigger,
   NavigationMenuContent,
 } from "@/components/ui/navigation-menu";
 import { Search, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// 1. Import the modal hook
+import { useModal } from "@/contexts/ModalContext";
+
 export const Header = () => {
+  // 2. Get the function to open the modal
+  const { openContactModal } = useModal();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-gray-900/80">
       <div className="container mx-auto flex h-16 items-center justify-between px-6">
-        
         {/* Logo + Navigation Row */}
         <div className="flex items-center gap-10">
           {/* Logo */}
@@ -65,18 +70,21 @@ export const Header = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
+              {/* 3. MODIFIED THIS SECTION */}
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link
-                    to="/contact"
+                  {/* Changed <Link> to <button> and added onClick */}
+                  <button
+                    type="button"
+                    onClick={openContactModal}
                     className="text-[15px] font-medium text-[#0A2540] dark:text-white transition-colors hover:text-[#FF6B35] hover:underline underline-offset-4"
                   >
                     Contact Us
-                  </Link>
+                  </button>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-                <NavigationMenuItem>
+              <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
                     to="/About"
@@ -86,7 +94,6 @@ export const Header = () => {
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-
 
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
@@ -104,10 +111,17 @@ export const Header = () => {
 
         {/* Auth Buttons */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild className="text-black bg-transparent hover:text-white hover:bg-green-600 dark:text-white dark:hover:bg-green-600">
+          <Button
+            variant="ghost"
+            asChild
+            className="text-black bg-transparent hover:text-white hover:bg-green-600 dark:text-white dark:hover:bg-green-600"
+          >
             <Link to="/login">Login</Link>
           </Button>
-         <Button asChild className="bg-blue-600 hover:bg-blue-700 text-black hover:text-black">
+          <Button
+            asChild
+            className="bg-blue-600 hover:bg-blue-700 text-black hover:text-black"
+          >
             <Link to="/signup">Sign Up</Link>
           </Button>
         </div>
@@ -115,4 +129,3 @@ export const Header = () => {
     </header>
   );
 };
-
