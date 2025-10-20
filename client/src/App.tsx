@@ -16,6 +16,7 @@ import LoginSignup from "./pages/LoginSignup";
 import OtpPage from "./pages/OtpPage";
 import JobPage from "./pages/JobPage";
 import Contact from "./pages/contact";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,9 @@ const App: React.FC = () => (
             <Route path="/otp" element={<OtpPage />} />
             <Route path="/jobPage" element={<JobPage />} />
             <Route path="/contact" element={<Contact />} />
-            {/* The /contact route is removed */}
+            <Route path="/About" element={<About />} />
+
+            {/* route is addition/removal */}
           </Routes>
         </BrowserRouter>
         
