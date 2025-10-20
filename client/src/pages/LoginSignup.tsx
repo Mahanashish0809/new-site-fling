@@ -20,32 +20,39 @@ const LoginSignup: React.FC = () => {
   };
 
   // Inside handleSubmit()
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  const endpoint = isLogin ? "/api/login" : "/api/signup";
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
+    // Load API base URL from env
+    const API_URL = import.meta.env.VITE_API_URL;
+    const endpoint = isLogin ? `${API_URL}/login` : `${API_URL}/signup`;
 
-    if (!res.ok) throw new Error(data.message || "Request failed");
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    if (isLogin) {
-      alert("Logged in successfully!");
-      navigate("/");
-    } else {
-      // After signup → redirect to OTP page with email
-      navigate("/otp", { state: { email: form.email } });
+      const data = await res.json();
+      console.log("Backend Response:", data);
+
+      if (!res.ok) throw new Error(data.error || data.message || "Request failed");
+
+      if (isLogin) {
+        localStorage.setItem("token", data.token); // save JWT if returned
+        alert("Logged in successfully!");
+        navigate("/");
+      } else {
+        alert("Signup successful!");
+        navigate("/otp", { state: { email: form.email } });
+      }
+    } catch (err) {
+      console.error("Frontend error:", err);
+      alert(err.message || "Something went wrong!");
     }
-  } catch (error) {
-    console.error(error);
-    alert("Something went wrong!");
-  }
-};
+  };
+
 
 
   return (
