@@ -19,13 +19,12 @@ const LoginSignup: React.FC = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Inside handleSubmit()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Load API base URL from env
     const API_URL = import.meta.env.VITE_API_URL;
-    const endpoint = isLogin ? `${API_URL}/login` : `${API_URL}/signup`;
+    const endpoint = isLogin
+      ? `${API_URL}/login`
+      : `${API_URL}/signup`;
 
     try {
       const res = await fetch(endpoint, {
@@ -35,55 +34,35 @@ const LoginSignup: React.FC = () => {
       });
 
       const data = await res.json();
-      console.log("Backend Response:", data);
-
       if (!res.ok) throw new Error(data.error || data.message || "Request failed");
 
-      if (isLogin) {
-        localStorage.setItem("token", data.token); // save JWT if returned
-        alert("Logged in successfully!");
-        navigate("/");
-      } else {
-        alert("Signup successful!");
-        navigate("/otp", { state: { email: form.email } });
+      if (!isLogin) {
+        if (import.meta.env.MODE !== "production" && data.devOtp) {
+          // DEV mode: navigate to OTP page and include OTP so you can auto-fill it for tests
+          navigate("/otp", { state: { email: form.email, devOtp: data.devOtp } });
+        } else {
+          navigate("/otp", { state: { email: form.email } });
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Frontend error:", err);
       alert(err.message || "Something went wrong!");
     }
   };
 
-
-
   return (
-   
-    <div className="h-screen flex items-center justify-center 
-    bg-gradient-to-b from-[#0b132b] to-[#1c2541] text-white px-6 py-8">
-
-      {/* 🟠 CHANGED: Modern dark card with rounded edges and subtle border */}
-      <Card className="w-full max-w-md bg-[#1b1b2f] border border-[#282846] 
-      shadow-2xl rounded-3xl p-10">
-
-        {/* 🟠 CHANGED: Header with orange title and gray subtitle */}
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-extrabold text-[#ff9f1c]">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-white">
+      <Card className="w-full max-w-md shadow-lg border border-gray-200 bg-white">
+        <CardHeader>
+          <CardTitle className="text-center text-3xl font-bold text-[#0A2540]">
             {isLogin ? "Welcome Back" : "Create an Account"}
           </CardTitle>
-          <p className="text-gray-400 mt-2 text-sm">
-            {isLogin
-              ? "Sign in to continue building the future with JoltQ."
-              : "Join the JoltQ community today!"}
-          </p>
         </CardHeader>
-
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && (
               <div className="space-y-1">
-                <Label htmlFor="username" className="text-gray-300">
-                  Username
-                </Label>
-                {/* 🟠 CHANGED: Input with dark background + orange focus */}
+                <Label htmlFor="username">Username</Label>
                 <Input
                   id="username"
                   name="username"
@@ -91,16 +70,12 @@ const LoginSignup: React.FC = () => {
                   value={form.username}
                   onChange={handleChange}
                   required
-                  className="bg-[#0b132b] border border-gray-600 text-white 
-                  placeholder-gray-500 focus:border-[#ff9f1c] focus:ring-[#ff9f1c]"
                 />
               </div>
             )}
 
             <div className="space-y-1">
-              <Label htmlFor="email" className="text-gray-300">
-                Email
-              </Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 name="email"
@@ -109,15 +84,11 @@ const LoginSignup: React.FC = () => {
                 value={form.email}
                 onChange={handleChange}
                 required
-                className="bg-[#0b132b] border border-gray-600 text-white 
-                placeholder-gray-500 focus:border-[#ff9f1c] focus:ring-[#ff9f1c]"
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="password" className="text-gray-300">
-                Password
-              </Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 name="password"
@@ -126,26 +97,21 @@ const LoginSignup: React.FC = () => {
                 value={form.password}
                 onChange={handleChange}
                 required
-                className="bg-[#0b132b] border border-gray-600 text-white 
-                placeholder-gray-500 focus:border-[#ff9f1c] focus:ring-[#ff9f1c]"
               />
             </div>
 
-            {/* 🟠 CHANGED: Orange button with hover transition */}
             <Button
               type="submit"
-              className="w-full mt-3 bg-[#ff9f1c] hover:bg-[#ffa733] 
-              text-[#0b132b] font-semibold rounded-lg transition-all"
+              className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
             >
               {isLogin ? "Login" : "Sign Up"}
             </Button>
 
-            {/* 🟠 CHANGED: Gray text with orange link */}
-            <p className="text-center text-sm text-gray-400 mt-3">
+            <p className="text-center text-sm text-gray-500 mt-3">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <span
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-[#ff9f1c] font-medium hover:underline cursor-pointer"
+                className="text-blue-600 font-medium hover:underline cursor-pointer"
               >
                 {isLogin ? "Sign up" : "Login"}
               </span>

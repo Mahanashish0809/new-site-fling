@@ -8,25 +8,29 @@ import { Label } from "@/components/ui/label";
 const OtpPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const email = location.state?.email || ""; // email passed from signup page
-  const [otp, setOtp] = useState("");
+  const email = location.state?.email || "";
+  const devOtp = location.state?.devOtp || "";
+  const [otp, setOtp] = useState(devOtp); // will auto-fill for dev
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const API_URL = import.meta.env.VITE_API_URL;
+
     try {
-      const res = await fetch("/api/verify-otp", {
+      const res = await fetch(`${API_URL}/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
       });
+
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.message || "Invalid OTP");
+      if (!res.ok) throw new Error(data.error || data.message || "Invalid OTP");
 
       alert("OTP verified successfully!");
-      navigate("/"); // redirect to homepage or dashboard
-    } catch (err) {
-      alert("Invalid or expired OTP!");
+      navigate("/login");
+    } catch (err: any) {
+      alert(err.message || "Invalid or expired OTP!");
       console.error(err);
     }
   };
@@ -65,7 +69,7 @@ const OtpPage: React.FC = () => {
               Didn’t receive the code?{" "}
               <span
                 className="text-blue-600 font-medium hover:underline cursor-pointer"
-                onClick={() => alert("Resend OTP logic here!")}
+                onClick={() => alert("Resend OTP logic will be added soon!")}
               >
                 Resend OTP
               </span>

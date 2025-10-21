@@ -8,9 +8,13 @@ generator client {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String
-  password  String
-  createdAt DateTime @default(now())
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  username      String
+  password      String
+  createdAt     DateTime  @default(now())
+  isVerified    Boolean   @default(false)
+  otpCode       String?   // stores OTP temporarily
+  otpExpiresAt  DateTime? // when the OTP expires
 }
+
