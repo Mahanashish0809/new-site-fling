@@ -1,0 +1,1 @@
+# psql -h user.c0fo0cumqafz.us-east-1.rds.amazonaws.com -U postgres -d postgres -p 5432
