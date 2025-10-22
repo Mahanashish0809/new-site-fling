@@ -24,17 +24,17 @@ const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 // --- Helper to send OTP mail ---
 async function sendOtpEmail(receiverEmail, otp) {
   const mailOptions = {
-    from: `"JobHub Verification" <${process.env.EMAIL_USER}>`, // Sender Gmail
+    from: `"JoltQ Verification" <${process.env.EMAIL_USER}>`, // Sender Gmail
     to: receiverEmail, // Receiver = user email
-    subject: "Your JobHub Verification Code",
+    subject: "Your JoltQ Verification Code",
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2 style="color:#2563eb;">Verify Your Account</h2>
         <p>Hello,</p>
-        <p>Your One-Time Password (OTP) for verifying your JobHub account is:</p>
+        <p>Your One-Time Password (OTP) for verifying your JoltQ account is:</p>
         <h1 style="letter-spacing: 4px; color:#2563eb;">${otp}</h1>
         <p>This OTP will expire in 10 minutes. Please do not share it with anyone.</p>
-        <p>Regards,<br/>The JobHub Team</p>
+        <p>Regards,<br/>The JoltQ Team</p>
       </div>
     `,
   };
