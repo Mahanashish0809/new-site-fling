@@ -56,31 +56,49 @@ const LoginSignup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-white">
-      <Card className="w-full max-w-md shadow-lg border border-gray-200 bg-white">
+   // ✅ Increased min height and centered card to half-page layout
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0F24] to-[#0A2540] overflow-hidden text-white">
+
+      {/* 🔸 Glowing background spheres */}
+      <div className="absolute top-20 left-32 w-72 h-72 bg-gradient-to-r from-orange-600 to-yellow-400 rounded-full opacity-30 blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-20 right-32 w-80 h-80 bg-gradient-to-r from-purple-700 to-indigo-500 rounded-full opacity-25 blur-3xl animate-pulse"></div>
+
+      {/* 🔹 Main card container */}
+      <Card className="relative w-full max-w-2xl bg-[#101a3f]/90 border border-gray-700 shadow-2xl rounded-2xl p-10 backdrop-blur-md z-10">
         <CardHeader>
-          <CardTitle className="text-center text-3xl font-bold text-[#0A2540]">
-            {isLogin ? "Welcome Back" : "Create an Account"}
+          <CardTitle className="text-center text-4xl font-extrabold text-white drop-shadow-md">
+            {isLogin ? "Welcome Back" : "Create Your JoltQ Account"}
           </CardTitle>
+          <p className="text-center text-gray-400 mt-2">
+            {isLogin
+              ? "Log in to continue your AI-powered career journey."
+              : "Sign up to explore personalized job recommendations."}
+          </p>
         </CardHeader>
+
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
-              <div className="space-y-1">
-                <Label htmlFor="username">Username</Label>
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-gray-300">
+                  Username
+                </Label>
                 <Input
                   id="username"
                   name="username"
                   placeholder="Enter your username"
                   value={form.username}
                   onChange={handleChange}
+                  className="bg-[#0d1636] text-white border-gray-600 focus:border-orange-400 focus:ring-1 focus:ring-orange-400"
                   required
                 />
               </div>
             )}
 
-            <div className="space-y-1">
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-gray-300">
+                Email
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -88,12 +106,15 @@ const LoginSignup: React.FC = () => {
                 placeholder="Enter your email"
                 value={form.email}
                 onChange={handleChange}
+                className="bg-[#0d1636] text-white border-gray-600 focus:border-orange-400 focus:ring-1 focus:ring-orange-400"
                 required
               />
             </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-gray-300">
+                Password
+              </Label>
               <Input
                 id="password"
                 name="password"
@@ -101,22 +122,24 @@ const LoginSignup: React.FC = () => {
                 placeholder="Enter your password"
                 value={form.password}
                 onChange={handleChange}
+                className="bg-[#0d1636] text-white border-gray-600 focus:border-orange-400 focus:ring-1 focus:ring-orange-400"
                 required
               />
             </div>
 
+            {/* 🔸 Gradient button */}
             <Button
               type="submit"
-              className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+              className="w-full mt-4 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-semibold py-3 text-lg rounded-xl transition-all duration-300"
             >
               {isLogin ? "Login" : "Sign Up"}
             </Button>
 
-            <p className="text-center text-sm text-gray-500 mt-3">
+            <p className="text-center text-sm text-gray-400 mt-4">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <span
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-blue-600 font-medium hover:underline cursor-pointer"
+                className="text-orange-400 font-medium hover:underline cursor-pointer"
               >
                 {isLogin ? "Sign up" : "Login"}
               </span>
