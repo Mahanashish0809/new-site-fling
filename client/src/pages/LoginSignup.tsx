@@ -36,14 +36,19 @@ const LoginSignup: React.FC = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || data.message || "Request failed");
 
-      if (!isLogin) {
+      if (isLogin) {
+        // ✅ LOGIN SUCCESS → Save token and navigate to Jobs page
+        localStorage.setItem("token", data.token);
+        navigate("/jobs");
+      } else {
+        // ✅ SIGNUP → Go to OTP page
         if (import.meta.env.MODE !== "production" && data.devOtp) {
-          // DEV mode: navigate to OTP page and include OTP so you can auto-fill it for tests
           navigate("/otp", { state: { email: form.email, devOtp: data.devOtp } });
         } else {
           navigate("/otp", { state: { email: form.email } });
         }
       }
+
     } catch (err: any) {
       console.error("Frontend error:", err);
       alert(err.message || "Something went wrong!");
