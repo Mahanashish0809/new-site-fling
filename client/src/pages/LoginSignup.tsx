@@ -39,7 +39,7 @@ const LoginSignup: React.FC = () => {
       if (isLogin) {
         // ✅ LOGIN SUCCESS → Save token and navigate to Jobs page
         localStorage.setItem("token", data.token);
-        navigate("/jobs");
+        navigate("/jobPage");
       } else {
         // ✅ SIGNUP → Go to OTP page
         if (import.meta.env.MODE !== "production" && data.devOtp) {

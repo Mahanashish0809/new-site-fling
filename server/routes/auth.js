@@ -169,18 +169,24 @@ router.post("/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
+    // ✅ Include username in JWT payload
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.JWT_SECRET,
+      { userId: user.id, email: user.email, username: user.username },
+      process.env.JWT_SECRET || "supersecretkey",
       { expiresIn: "1d" }
     );
 
-    res.json({ message: "Login successful", token });
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: { id: user.id, email: user.email, username: user.username },
+    });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 // ---------------- PROFILE (Protected) ----------------
 router.get("/profile", verifyToken, async (req, res) => {
