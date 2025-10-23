@@ -5,10 +5,13 @@ interface ModalContextType {
   isContactModalOpen: boolean;
   openContactModal: () => void;
   closeContactModal: () => void;
+  // Add state and functions for the About modal
+  isAboutModalOpen: boolean;
+  openAboutModal: () => void;
+  closeAboutModal: () => void;
 }
 
-// 2. Create the context with a default value (or null, with a check in the hook)
-// We cast 'undefined' to the type, as the provider will supply the real value.
+// 2. Create the context
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 // 3. Create a custom hook for easy access
@@ -28,11 +31,25 @@ interface ModalProviderProps {
 // 5. Create the provider component
 export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
   const [isContactModalOpen, setIsContactModalOpen] = useState<boolean>(false);
+  // Add state for the About modal
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState<boolean>(false);
 
   const openContactModal = () => setIsContactModalOpen(true);
   const closeContactModal = () => setIsContactModalOpen(false);
 
-  const value = { isContactModalOpen, openContactModal, closeContactModal };
+  // Add functions for the About modal
+  const openAboutModal = () => setIsAboutModalOpen(true);
+  const closeAboutModal = () => setIsAboutModalOpen(false);
+
+  // Add the new state and functions to the context value
+  const value = { 
+    isContactModalOpen, 
+    openContactModal, 
+    closeContactModal,
+    isAboutModalOpen,
+    openAboutModal,
+    closeAboutModal
+  };
 
   return (
     <ModalContext.Provider value={value}>

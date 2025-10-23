@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 
 import { ModalProvider } from "./contexts/ModalContext";
 import ContactModal from "./pages/ContactModal";
+import AboutModal from "./pages/AboutModal"; // 1. Import AboutModal
 
 import Index from "./pages/Index";
 import JobDetail from "./pages/JobDetail";
@@ -23,7 +24,7 @@ const AppRoutes = () => {
   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
   const location = useLocation();
 
-  // ✅ Watch for token changes from anywhere in the app
+  // Watch for token changes from anywhere in the app
   useEffect(() => {
     const handleStorageChange = () => {
       setToken(localStorage.getItem("token"));
@@ -32,7 +33,7 @@ const AppRoutes = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // ✅ Update token on login/logout within same tab
+  // Update token on login/logout within same tab
   useEffect(() => {
     const tokenNow = localStorage.getItem("token");
     if (tokenNow !== token) setToken(tokenNow);
@@ -47,7 +48,7 @@ const AppRoutes = () => {
       <Route path="/jobPage" element={token ? <JobPage /> : <Navigate to="/" />} />
       <Route path="/job/:id" element={<JobDetail />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/about" element={<About />} />
+      <Route path="/about" element={<About />} /> {/* This route still works for the page */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -62,6 +63,7 @@ const App: React.FC = () => (
         <BrowserRouter>
           <AppRoutes />
           <ContactModal />
+          <AboutModal /> {/* 2. Render AboutModal here */}
         </BrowserRouter>
       </ModalProvider>
     </TooltipProvider>
