@@ -12,6 +12,7 @@
     "prisma": "^6.17.1"
   },
   "scripts": {
+    "seed": "prisma db seed",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },

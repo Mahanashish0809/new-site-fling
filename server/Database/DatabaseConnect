@@ -1,1 +1,9 @@
-# psql -h user.c0fo0cumqafz.us-east-1.rds.amazonaws.com -U postgres -d postgres -p 5432
+#psql -h user.c0fo0cumqafz.us-east-1.rds.amazonaws.com -U postgres -d postgres -p 5432
+#
+| Detail                  | Value                                           |
+| ----------------------- | ----------------------------------------------- |
+| **DB Identifier**       | `user`                                          |
+| **Engine**              | `PostgreSQL`                                    |
+| **Endpoint / Hostname** | `user.c0fo0cumqafz.us-east-1.rds.amazonaws.com` |
+| **Port**                | `5432`                                          |
+| **Master Username**     | `postgres`                                      |
