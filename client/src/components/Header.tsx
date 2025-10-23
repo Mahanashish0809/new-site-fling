@@ -14,8 +14,8 @@ import { Link } from "react-router-dom";
 import { useModal } from "@/contexts/ModalContext";
 
 export const Header = () => {
-  // 2. Get the function to open the modal
-  const { openContactModal } = useModal();
+  // 2. Get BOTH functions to open the modals
+  const { openContactModal, openAboutModal } = useModal();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-gray-900/80">
@@ -70,10 +70,9 @@ export const Header = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* 3. MODIFIED THIS SECTION */}
+              {/* Contact Us Button */}
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  {/* Changed <Link> to <button> and added onClick */}
                   <button
                     type="button"
                     onClick={openContactModal}
@@ -84,14 +83,17 @@ export const Header = () => {
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
+              {/* 3. MODIFIED THIS SECTION FOR 'ABOUT US' */}
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link
-                    to="/About"
+                  {/* Changed <Link> to <button> and added onClick */}
+                  <button
+                    type="button"
+                    onClick={openAboutModal} 
                     className="text-[15px] font-medium text-[#0A2540] dark:text-white transition-colors hover:text-[#FF6B35] hover:underline underline-offset-4"
                   >
                     About Us
-                  </Link>
+                  </button>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
