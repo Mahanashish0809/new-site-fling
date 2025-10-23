@@ -139,8 +139,12 @@ router.post("/verify-otp", async (req, res) => {
       return res.status(400).json({ error: "User already verified" });
     if (!user.otpCode || !user.otpExpiresAt)
       return res.status(400).json({ error: "No active OTP. Request a new one." });
-    if (new Date() > user.otpExpiresAt)
+    if (new Date() > user.otpExpiresAt){
+      await prisma.user.delete({
+      where: { email: email },
+    });
       return res.status(400).json({ error: "OTP expired" });
+    }
     if (user.otpCode !== otp)
       return res.status(400).json({ error: "Invalid OTP" });
 
