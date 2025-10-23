@@ -47,7 +47,7 @@ const JobPage: React.FC = () => {
 
   const handleSignOut = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    window.location.href = "/";
   };
 
   const [filters, setFilters] = useState({

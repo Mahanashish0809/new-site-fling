@@ -1,13 +1,12 @@
-import React from 'react'; // Import React
+import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
-// 1. Import the provider and the new modal
-import { ModalProvider } from './contexts/ModalContext'; // .tsx extension is implied
-import ContactModal from './pages/ContactModal'; // .tsx extension is implied
+import { ModalProvider } from "./contexts/ModalContext";
+import ContactModal from "./pages/ContactModal";
 
 import Index from "./pages/Index";
 import JobDetail from "./pages/JobDetail";
@@ -20,30 +19,50 @@ import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
-// 2. Type the component as a React Functional Component
+const AppRoutes = () => {
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const location = useLocation();
+
+  // ✅ Watch for token changes from anywhere in the app
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setToken(localStorage.getItem("token"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // ✅ Update token on login/logout within same tab
+  useEffect(() => {
+    const tokenNow = localStorage.getItem("token");
+    if (tokenNow !== token) setToken(tokenNow);
+  }, [location]);
+
+  return (
+    <Routes>
+      <Route path="/" element={token ? <JobPage /> : <Index />} />
+      <Route path="/login" element={<LoginSignup />} />
+      <Route path="/signup" element={<LoginSignup />} />
+      <Route path="/otp" element={<OtpPage />} />
+      <Route path="/jobPage" element={token ? <JobPage /> : <Navigate to="/" />} />
+      <Route path="/job/:id" element={<JobDetail />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/about" element={<About />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <ModalProvider> 
+      <ModalProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/job/:id" element={<JobDetail />} />
-            <Route path="*" element={<NotFound />} />
-            <Route path="/login" element={<LoginSignup />} />
-            <Route path="/signup" element={<LoginSignup />} />
-            <Route path="/otp" element={<OtpPage />} />
-            <Route path="/jobPage" element={<JobPage />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/About" element={<About />} />
-
-            {/* route is addition/removal */}
-          </Routes>
+          <AppRoutes />
+          <ContactModal />
         </BrowserRouter>
-        
-        <ContactModal />
       </ModalProvider>
     </TooltipProvider>
   </QueryClientProvider>

@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginSignup: React.FC = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
@@ -39,7 +41,7 @@ const LoginSignup: React.FC = () => {
       if (isLogin) {
         // ✅ LOGIN SUCCESS → Save token and navigate to Jobs page
         localStorage.setItem("token", data.token);
-        navigate("/jobPage");
+        navigate("/jobPage", { replace: true });
       } else {
         // ✅ SIGNUP → Go to OTP page
         if (import.meta.env.MODE !== "production" && data.devOtp) {
@@ -56,7 +58,7 @@ const LoginSignup: React.FC = () => {
   };
 
   return (
-   // ✅ Increased min height and centered card to half-page layout
+    // ✅ Increased min height and centered card to half-page layout
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0A0F24] to-[#0A2540] overflow-hidden text-white">
 
       {/* 🔸 Glowing background spheres */}
@@ -111,21 +113,27 @@ const LoginSignup: React.FC = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">
-                Password
-              </Label>
+            <div className="space-y-1 relative">
+              <Label htmlFor="password" className="text-gray-300">Password</Label>
               <Input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"} // 👈 toggle type here
                 placeholder="Enter your password"
                 value={form.password}
                 onChange={handleChange}
-                className="bg-[#0d1636] text-white border-gray-600 focus:border-orange-400 focus:ring-1 focus:ring-orange-400"
                 required
+                className="bg-[#0d1636] text-white border-gray-600 focus:border-orange-400 focus:ring-1 focus:ring-orange-400"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-8 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
+
 
             {/* 🔸 Gradient button */}
             <Button
