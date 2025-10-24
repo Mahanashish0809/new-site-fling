@@ -101,25 +101,36 @@ router.post("/signup", async (req, res) => {
 router.post("/resend-otp", async (req, res) => {
   try {
     const { email } = req.body;
+
     if (!email) return res.status(400).json({ error: "Email required" });
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(404).json({ error: "User not found" });
-    if (user.isVerified)
-      return res.status(400).json({ error: "Already verified" });
 
-    const otp = genOtp();
-    const otpExpiresAt = new Date(Date.now() + OTP_TTL_MS);
+    if (user.isVerified) {
+      return res.status(400).json({ error: "User already verified" });
+    }
 
+    // Generate new OTP and expiry time
+    const newOtp = genOtp();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+
+    // Update user record
     await prisma.user.update({
       where: { email },
-      data: { otpCode: otp, otpExpiresAt },
+      data: {
+        otpCode: newOtp,
+        otpExpiresAt,
+      },
     });
 
-    res.json({ message: "New OTP sent to your email." });
-
-    await sendOtpEmail(email, otp);
-    console.log(`📩 Resent OTP to ${email}`);
+    // Send OTP email
+    await sendOtpEmail(email, newOtp);
+    // Return response
+    res.status(200).json({
+      message: "New OTP sent successfully",
+      ...(import.meta.env?.MODE !== "production" && { devOtp: newOtp }), // show OTP only in dev
+    });
   } catch (err) {
     console.error("Resend OTP error:", err);
     res.status(500).json({ error: "Server error" });
