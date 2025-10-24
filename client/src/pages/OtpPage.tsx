@@ -12,6 +12,28 @@ const OtpPage: React.FC = () => {
   const devOtp = location.state?.devOtp || "";
   const [otp, setOtp] = useState(devOtp); // will auto-fill for dev
 
+  const handleResendOtp = async () => {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/resend-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Failed to resend OTP");
+
+    alert("OTP resent successfully!");
+    if (import.meta.env.MODE !== "production" && data.devOtp) {
+      console.log("New Dev OTP:", data.devOtp);
+    }
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const API_URL = import.meta.env.VITE_API_URL;
@@ -88,7 +110,7 @@ const OtpPage: React.FC = () => {
               Didn’t receive the code?{" "}
               <span
                 className="text-orange-400 font-semibold hover:underline cursor-pointer"
-                onClick={() => alert('Resend OTP logic will be added soon!')}
+                onClick={() => handleResendOtp()}
               >
                 Resend OTP
               </span>
