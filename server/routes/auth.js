@@ -10,12 +10,13 @@ const prisma = new PrismaClient();
 
 // --- Gmail transporter (requires App Password from Gmail account) ---
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
   auth: {
-    user: process.env.EMAIL_USER, // sender Gmail (your service account)
-    pass: process.env.EMAIL_PASS, // Gmail App Password (16 chars, no spaces)
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
+
 
 // --- OTP generator ---
 const genOtp = () => Math.floor(100000 + Math.random() * 900000).toString();

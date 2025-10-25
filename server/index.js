@@ -1,16 +1,32 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 
 const app = express();
-app.use(cors({ origin: "http://localhost:8080", credentials: true }));
+const PORT = process.env.PORT || 8081;
+
+// ✅ Enable CORS for all origins (add this before routes)
+app.use(cors({
+  origin: "*",  // allow all origins for testing
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
+// ✅ Enable JSON body parsing
 app.use(express.json());
 
-// ✅ Prefix should match .env base URL
+// --- Example route ---
+app.get("/", (req, res) => {
+  res.send("Server is reachable ✅");
+});
+
+// --- Your existing routes ---
+import authRoutes from "./routes/auth.js";
 app.use("/api/auth", authRoutes);
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+// --- Start server ---
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ Server running at http://192.168.1.182:${PORT}`);
+});
