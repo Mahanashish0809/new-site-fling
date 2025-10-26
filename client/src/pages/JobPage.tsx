@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import JobSearchBar from "../components/JobSearchBar";
 import JobFiltersSidebar from "../components/JobFilterSidebar";
@@ -6,7 +6,7 @@ import JobList from "../components/JobList";
 import { Job } from "../components/JobPost";
 import { Button } from "@/components/ui/button";
 
-// Optional helper to decode JWT payload safely
+// ✅ Helper to decode JWT safely
 const decodeToken = (token: string) => {
   try {
     const base64Url = token.split(".")[1];
@@ -23,11 +23,22 @@ const decodeToken = (token: string) => {
   }
 };
 
+// ✅ Helper: Extract full first name (truncate only if over 15 chars)
+const formatDisplayName = (name: string | undefined): string => {
+  if (!name) return "User";
+  let displayName = name.includes("@") ? name.split("@")[0] : name.trim().split(" ")[0];
+  displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+  if (displayName.length > 15) displayName = displayName.slice(0, 15) + "...";
+  return displayName;
+};
+
 const JobPage: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<{ email?: string; username?: string } | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Redirect if not logged in and extract user info from token
+  // ✅ Decode and verify token
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -39,7 +50,6 @@ const JobPage: React.FC = () => {
     if (decoded) {
       setUser({ email: decoded.email, username: decoded.username });
     } else {
-      // Invalid token — logout
       localStorage.removeItem("token");
       navigate("/login");
     }
@@ -49,6 +59,17 @@ const JobPage: React.FC = () => {
     localStorage.removeItem("token");
     window.location.href = "/";
   };
+
+  // ✅ Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const [filters, setFilters] = useState({
     keyword: "",
@@ -91,26 +112,61 @@ const JobPage: React.FC = () => {
           onClick={() => navigate("/jobPage")}
           className="text-xl font-bold text-[#0A2540] cursor-pointer"
         >
-          Job Aggregator
+          JoltQ
         </h1>
 
-        <div className="flex items-center gap-4">
+        {/* ✅ User Dropdown */}
+        <div className="relative flex items-center gap-4" ref={dropdownRef}>
           {user && (
-            <span className="text-gray-700 font-medium">
-              Welcome, {user.username || user.email}
-            </span>
+            <div>
+              <button
+                onClick={() => setDropdownOpen((prev) => !prev)}
+                className="flex items-center gap-2 text-gray-700 font-medium focus:outline-none"
+              >
+                <span>Welcome, {formatDisplayName(user.username || user.email)}</span>
+                <svg
+                  className={`w-4 h-4 transform transition-transform duration-200 ${
+                    dropdownOpen ? "rotate-180" : "rotate-0"
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50 transition-all duration-200 ease-in-out transform origin-top">
+                  <button
+                    onClick={() => navigate("/profile")}
+                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    🧑‍💻 Profile
+                  </button>
+                  <button
+                    onClick={() => navigate("/settings")}
+                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    ⚙️ Settings
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                  >
+                    🚪 Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           )}
-          <Button
-            onClick={handleSignOut}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
-          >
-            Sign Out
-          </Button>
         </div>
       </header>
 
       {/* ✅ Main Page Content */}
       <main className="p-6 flex flex-col gap-6 flex-1">
+        {/* ✅ Search Bar */}
         <JobSearchBar
           filters={filters}
           setFilters={setFilters}
@@ -118,6 +174,7 @@ const JobPage: React.FC = () => {
           onClear={handleClear}
         />
 
+        {/* ✅ Jobs & Filters */}
         <div className="flex gap-6">
           <JobFiltersSidebar />
           <JobList jobs={jobs} />
