@@ -6,6 +6,7 @@ interface JobFiltersSidebarProps {
     location: string;
     category: string;
     mode: string;
+    jobTypes: string[];
   };
   setFilters: React.Dispatch<
     React.SetStateAction<{
@@ -13,26 +14,42 @@ interface JobFiltersSidebarProps {
       location: string;
       category: string;
       mode: string;
+      jobTypes: string[];
     }>
   >;
 }
 
 const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ filters, setFilters }) => {
+  const jobTypes = ["Full-Time", "Part-Time", "Internship", "Contract"];
+
+  const handleJobTypeChange = (type: string) => {
+    const updatedJobTypes = filters.jobTypes.includes(type)
+      ? filters.jobTypes.filter((t) => t !== type)
+      : [...filters.jobTypes, type];
+    setFilters({ ...filters, jobTypes: updatedJobTypes });
+  };
+
   return (
     <div className="w-1/4 bg-white p-5 rounded-xl shadow-md">
       <h3 className="text-lg font-semibold mb-3">Filters</h3>
 
-      {/* ✅ Job Type */}
+      {/* ✅ Job Type Filter */}
       <div className="mb-4">
         <h4 className="font-medium mb-2">Job Type</h4>
-        {["Full-Time", "Part-Time", "Internship", "Contract"].map((type) => (
-          <label key={type} className="block text-sm mb-1">
-            <input type="checkbox" className="mr-2" /> {type}
+        {jobTypes.map((type) => (
+          <label key={type} className="block text-sm mb-1 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={filters.jobTypes.includes(type)}
+              onChange={() => handleJobTypeChange(type)}
+              className="mr-2 accent-blue-600 cursor-pointer"
+            />
+            {type}
           </label>
         ))}
       </div>
 
-      {/* ✅ Salary Range */}
+      {/* Salary Filter (unchanged) */}
       <div className="mb-4">
         <h4 className="font-medium mb-2">Salary Range</h4>
         <select className="border border-gray-300 rounded-lg p-2 w-full">
@@ -43,7 +60,7 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ filters, setFilte
         </select>
       </div>
 
-      {/* ✅ Experience */}
+      {/* Experience (unchanged) */}
       <div className="mb-4">
         <h4 className="font-medium mb-2">Experience</h4>
         {["Entry Level", "Mid Level", "Senior Level"].map((exp) => (
@@ -53,7 +70,7 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ filters, setFilte
         ))}
       </div>
 
-      {/* ✅ Career Level */}
+      {/* Career Level (unchanged) */}
       <div className="mb-4">
         <h4 className="font-medium mb-2">Career Level</h4>
         <select className="border border-gray-300 rounded-lg p-2 w-full">
@@ -64,7 +81,7 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ filters, setFilte
         </select>
       </div>
 
-      {/* 🆕 Mode of Work Filter */}
+      {/* Mode of Work (unchanged) */}
       <div className="mb-4">
         <h4 className="font-medium mb-2">Mode of Work</h4>
         <select
