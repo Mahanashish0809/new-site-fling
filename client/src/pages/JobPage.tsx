@@ -5,6 +5,8 @@ import JobFiltersSidebar from "../components/JobFilterSidebar";
 import JobList from "../components/JobList";
 import { Job } from "../components/JobCard";
 
+
+
 import { Button } from "@/components/ui/button";
 
 // ✅ Helper: Decode JWT safely
@@ -73,12 +75,14 @@ const JobPage: React.FC = () => {
   }, []);
 
   // ✅ Filters
-  const [filters, setFilters] = useState({
-    keyword: "",
-    location: "",
-    category: "",
-    mode: "", // 🆕 Mode of work (Remote / Hybrid / On-site)
-  });
+ const [filters, setFilters] = useState({
+  keyword: "",
+  location: "",
+  category: "",
+  mode: "",
+  jobTypes: [] as string[], // ✅ Added jobTypes array
+});
+
 
   // ✅ Job data (with mode)
  const [jobs] = useState<Job[]>([
@@ -120,13 +124,26 @@ const JobPage: React.FC = () => {
 
   // ✅ Search handlers
   const handleSearch = () => console.log("Searching with filters:", filters);
-  const handleClear = () => setFilters({ keyword: "", location: "", category: "", mode: "" });
-
-  // ✅ Filter logic (by mode)
-  const filteredJobs = jobs.filter((job) => {
-    if (filters.mode && job.mode !== filters.mode) return false;
-    return true;
+ const handleClear = () =>
+  setFilters({
+    keyword: "",
+    location: "",
+    category: "",
+    mode: "",
+    jobTypes: [], // ✅ Reset jobTypes too
   });
+
+  const filteredJobs = jobs.filter((job) => {
+  // ✅ Mode Filter
+  if (filters.mode && job.mode !== filters.mode) return false;
+
+  // ✅ Job Type Filter
+  if (filters.jobTypes.length > 0 && !filters.jobTypes.includes(job.type)) {
+    return false;
+  }
+
+  return true;
+});
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
