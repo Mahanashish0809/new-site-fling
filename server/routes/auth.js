@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { PrismaClient } from "@prisma/client";
 import { verifyToken } from "../middleware/authMiddleware.js";
+import admin from "../firebaseAdmin.js";
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -42,6 +43,31 @@ async function sendOtpEmail(receiverEmail, otp) {
 
   return transporter.sendMail(mailOptions);
 }
+
+router.post("/firebase-login", async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: "Missing token" });
+
+    const decoded = await admin.auth().verifyIdToken(token);
+    const email = decoded.email;
+
+    let user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email,
+          username: decoded.name || email.split("@")[0],
+        },
+      });
+    }
+
+    return res.json({ success: true, user });
+  } catch (err) {
+    console.error("Firebase verify error:", err);
+    return res.status(500).json({ error: "Failed to verify Firebase token", details: err.message });
+  }
+});
 
 // ---------------- SIGNUP ----------------
 router.post("/signup", async (req, res) => {

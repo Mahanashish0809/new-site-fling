@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 8081;
 
 // ✅ Enable CORS for all origins (add this before routes)
 app.use(cors({
@@ -27,6 +26,7 @@ import authRoutes from "./routes/auth.js";
 app.use("/api/auth", authRoutes);
 
 // --- Start server ---
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Server running at http://192.168.1.182:${PORT}`);
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
