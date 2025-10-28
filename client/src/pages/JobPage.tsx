@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import JobSearchBar from "../components/JobSearchBar";
 import JobFiltersSidebar from "../components/JobFilterSidebar";
 import JobList from "../components/JobList";
-import { Job } from "../components/JobPost";
+import { Job } from "../components/JobCard";
+
 import { Button } from "@/components/ui/button";
 
-// ✅ Helper to decode JWT safely
+// ✅ Helper: Decode JWT safely
 const decodeToken = (token: string) => {
   try {
     const base64Url = token.split(".")[1];
@@ -23,7 +24,7 @@ const decodeToken = (token: string) => {
   }
 };
 
-// ✅ Helper: Extract full first name (truncate only if over 15 chars)
+// ✅ Helper: Format username for topbar
 const formatDisplayName = (name: string | undefined): string => {
   if (!name) return "User";
   let displayName = name.includes("@") ? name.split("@")[0] : name.trim().split(" ")[0];
@@ -38,7 +39,7 @@ const JobPage: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Decode and verify token
+  // ✅ Decode user token
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -60,7 +61,7 @@ const JobPage: React.FC = () => {
     window.location.href = "/";
   };
 
-  // ✅ Close dropdown on outside click
+  // ✅ Close user dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -71,42 +72,65 @@ const JobPage: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ✅ Filters
   const [filters, setFilters] = useState({
     keyword: "",
     location: "",
     category: "",
+    mode: "", // 🆕 Mode of work (Remote / Hybrid / On-site)
   });
 
-  const [jobs] = useState<Job[]>([
-    {
-      title: "Full Stack Developer",
-      type: "Full-Time",
-      location: "San Francisco, CA",
-      salary: "$100k - $120k",
-      daysLeft: 5,
-    },
-    {
-      title: "Backend Engineer",
-      type: "Remote",
-      location: "Austin, TX",
-      salary: "$90k - $110k",
-      daysLeft: 12,
-    },
-    {
-      title: "Data Analyst",
-      type: "Internship",
-      location: "New York, NY",
-      salary: "$25/hr",
-      daysLeft: 2,
-    },
-  ]);
+  // ✅ Job data (with mode)
+ const [jobs] = useState<Job[]>([
+  {
+    id: "1",
+    title: "Full Stack Developer",
+    company: "Google",
+    location: "San Francisco, CA",
+    type: "Full-Time",
+    salary: "$100k - $120k",
+    posted: "3 days ago",
+    description: "Design and build scalable web applications using React and Node.js.",
+    mode: "Remote",
+  },
+  {
+    id: "2",
+    title: "Backend Engineer",
+    company: "Amazon",
+    location: "Austin, TX",
+    type: "CO-OP",
+    salary: "$90k - $110k",
+    posted: "5 days ago",
+    description: "Develop and maintain backend services and APIs in a cloud environment.",
+    mode: "Hybrid",
+  },
+  {
+    id: "3",
+    title: "Data Analyst",
+    company: "Meta",
+    location: "New York, NY",
+    type: "Internship",
+    salary: "$25/hr",
+    posted: "2 days ago",
+    description: "Analyze business data and provide insights for product teams.",
+    mode: "On-site",
+  },
+]);
 
+
+  // ✅ Search handlers
   const handleSearch = () => console.log("Searching with filters:", filters);
-  const handleClear = () => setFilters({ keyword: "", location: "", category: "" });
+  const handleClear = () => setFilters({ keyword: "", location: "", category: "", mode: "" });
+
+  // ✅ Filter logic (by mode)
+  const filteredJobs = jobs.filter((job) => {
+    if (filters.mode && job.mode !== filters.mode) return false;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* ✅ Top Menubar */}
+      {/* ✅ Top Navbar */}
       <header className="w-full bg-white shadow-md py-3 px-6 flex justify-between items-center border-b border-gray-200">
         <h1
           onClick={() => navigate("/jobPage")}
@@ -166,7 +190,7 @@ const JobPage: React.FC = () => {
 
       {/* ✅ Main Page Content */}
       <main className="p-6 flex flex-col gap-6 flex-1">
-        {/* ✅ Search Bar */}
+        {/* ✅ Job Search Bar */}
         <JobSearchBar
           filters={filters}
           setFilters={setFilters}
@@ -174,10 +198,11 @@ const JobPage: React.FC = () => {
           onClear={handleClear}
         />
 
-        {/* ✅ Jobs & Filters */}
+        {/* ✅ Filters + Job List */}
         <div className="flex gap-6">
-          <JobFiltersSidebar />
-          <JobList jobs={jobs} />
+          {/* ✅ Pass filters to Sidebar */}
+          <JobFiltersSidebar filters={filters} setFilters={setFilters} />
+          <JobList jobs={filteredJobs} />
         </div>
       </main>
     </div>
