@@ -31,7 +31,7 @@ const LoginSignup: React.FC = () => {
         const userCred = await signInWithEmailAndPassword(auth, form.email, form.password);
         const token = await userCred.user.getIdToken();
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/firebase-login`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}api/auth/firebase-login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
@@ -48,7 +48,7 @@ const LoginSignup: React.FC = () => {
         const userCred = await createUserWithEmailAndPassword(auth, form.email, form.password);
         const token = await userCred.user.getIdToken();
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/firebase-login`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}api/auth/firebase-login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
