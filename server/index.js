@@ -1,21 +1,13 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import admin from "firebase-admin";
+import admin from "./firebaseAdmin.js";
 
 dotenv.config();
 
 const app = express();
 
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-admin.initializeApp({
-  credential: admin.credential.cert({
-    ...serviceAccount,
-    private_key: serviceAccount.private_key.replace(/\\n/g, '\n')
-  }),
-}); 
-
-// ✅ Enable CORS for all origins (add this before routes)
+// Enable CORS for all origins (add this before routes)
 app.use(cors({
   origin: [
     "https://joltq2025.web.app",        // your Firebase Hosting domain
@@ -26,7 +18,7 @@ app.use(cors({
   credentials: true
 }));
 
-// ✅ Enable JSON body parsing
+// Enable JSON body parsing
 app.use(express.json());
 
 // --- Example route ---
@@ -47,5 +39,5 @@ app.use("/api/auth", authRoutes);
 // --- Start server ---
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
