@@ -5,8 +5,6 @@ import JobFiltersSidebar from "../components/JobFilterSidebar";
 import JobList from "../components/JobList";
 import { Job } from "../components/JobCard";
 
-
-
 import { Button } from "@/components/ui/button";
 
 // ✅ Helper: Decode JWT safely
@@ -26,7 +24,7 @@ const decodeToken = (token: string) => {
   }
 };
 
-// ✅ Helper: Format username for topbar
+// ✅ Helper: Format username
 const formatDisplayName = (name: string | undefined): string => {
   if (!name) return "User";
   let displayName = name.includes("@") ? name.split("@")[0] : name.trim().split(" ")[0];
@@ -63,7 +61,7 @@ const JobPage: React.FC = () => {
     window.location.href = "/";
   };
 
-  // ✅ Close user dropdown when clicking outside
+  // ✅ Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -74,80 +72,99 @@ const JobPage: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Filters
- const [filters, setFilters] = useState({
-  keyword: "",
-  location: "",
-  category: "",
-  mode: "",
-  jobTypes: [] as string[], // ✅ Added jobTypes array
-});
-
-
-  // ✅ Job data (with mode)
- const [jobs] = useState<Job[]>([
-  {
-    id: "1",
-    title: "Full Stack Developer",
-    company: "Google",
-    location: "San Francisco, CA",
-    type: "Full-Time",
-    salary: "$100k - $120k",
-    posted: "3 days ago",
-    description: "Design and build scalable web applications using React and Node.js.",
-    mode: "Remote",
-  },
-  {
-    id: "2",
-    title: "Backend Engineer",
-    company: "Amazon",
-    location: "Austin, TX",
-    type: "CO-OP",
-    salary: "$90k - $110k",
-    posted: "5 days ago",
-    description: "Develop and maintain backend services and APIs in a cloud environment.",
-    mode: "Hybrid",
-  },
-  {
-    id: "3",
-    title: "Data Analyst",
-    company: "Meta",
-    location: "New York, NY",
-    type: "Internship",
-    salary: "$25/hr",
-    posted: "2 days ago",
-    description: "Analyze business data and provide insights for product teams.",
-    mode: "On-site",
-  },
-]);
-
-
-  // ✅ Search handlers
-  const handleSearch = () => console.log("Searching with filters:", filters);
- const handleClear = () =>
-  setFilters({
+  // ✅ Filters (added salary dropdown + experience)
+  const [filters, setFilters] = useState({
     keyword: "",
     location: "",
     category: "",
     mode: "",
-    jobTypes: [], // ✅ Reset jobTypes too
+    jobTypes: [] as string[],
+    salary: null as number | null, // in thousands
+    experience: [] as string[],
   });
 
+  // ✅ Job data (sample with experience)
+  const [jobs] = useState<Job[]>([
+    {
+      id: "1",
+      title: "Full Stack Developer",
+      company: "Google",
+      location: "San Francisco, CA",
+      type: "Full-Time",
+      salary: "$100k - $120k",
+      posted: "3 days ago",
+      description: "Design and build scalable web applications using React and Node.js.",
+      mode: "Remote",
+      experience: "Senior Level",
+    },
+    {
+      id: "2",
+      title: "Backend Engineer",
+      company: "Amazon",
+      location: "Austin, TX",
+      type: "CO-OP",
+      salary: "$90k - $110k",
+      posted: "5 days ago",
+      description: "Develop and maintain backend services and APIs in a cloud environment.",
+      mode: "Hybrid",
+      experience: "Mid Level",
+    },
+    {
+      id: "3",
+      title: "Data Analyst",
+      company: "Meta",
+      location: "New York, NY",
+      type: "Internship",
+      salary: "$25/hr",
+      posted: "2 days ago",
+      description: "Analyze business data and provide insights for product teams.",
+      mode: "On-site",
+      experience: "Entry Level",
+    },
+  ]);
+
+  // ✅ Clear filters
+  const handleClear = () =>
+    setFilters({
+      keyword: "",
+      location: "",
+      category: "",
+      mode: "",
+      jobTypes: [],
+     salary: null,
+      experience: [],
+    });
+
+  // ✅ Filtering Logic
   const filteredJobs = jobs.filter((job) => {
-  // ✅ Mode Filter
-  if (filters.mode && job.mode !== filters.mode) return false;
+    // Mode filter
+    if (filters.mode && job.mode !== filters.mode) return false;
 
-  // ✅ Job Type Filter
-  if (filters.jobTypes.length > 0 && !filters.jobTypes.includes(job.type)) {
-    return false;
+    // Job Type filter
+    if (filters.jobTypes.length > 0 && !filters.jobTypes.includes(job.type)) return false;
+
+    // Experience filter
+    if (filters.experience.length > 0 && !filters.experience.includes(job.experience)) return false;
+
+    // Salary filter
+    if (filters.salary !== null) {
+    const salaryMatch = job.salary.match(/\$?(\d+)(k|K)/g);
+    if (salaryMatch) {
+      const nums = salaryMatch.map((s) => parseInt(s.replace(/\D/g, "")));
+      const minSalary = Math.min(...nums);
+      const maxSalary = Math.max(...nums);
+      const selected = filters.salary!;
+      if (selected < minSalary || selected > maxSalary) return false;
+    } else if (job.salary.includes("/hr")) {
+      return false; // skip hourly jobs
+    }
   }
-
-  return true;
-});
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* ✅ Top Navbar */}
+      {/* ✅ Navbar */}
       <header className="w-full bg-white shadow-md py-3 px-6 flex justify-between items-center border-b border-gray-200">
         <h1
           onClick={() => navigate("/jobPage")}
@@ -179,7 +196,7 @@ const JobPage: React.FC = () => {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50 transition-all duration-200 ease-in-out transform origin-top">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50">
                   <button
                     onClick={() => navigate("/profile")}
                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -205,19 +222,16 @@ const JobPage: React.FC = () => {
         </div>
       </header>
 
-      {/* ✅ Main Page Content */}
+      {/* ✅ Main Page */}
       <main className="p-6 flex flex-col gap-6 flex-1">
-        {/* ✅ Job Search Bar */}
         <JobSearchBar
           filters={filters}
           setFilters={setFilters}
-          onSearch={handleSearch}
+          onSearch={() => console.log("Searching with filters:", filters)}
           onClear={handleClear}
         />
 
-        {/* ✅ Filters + Job List */}
         <div className="flex gap-6">
-          {/* ✅ Pass filters to Sidebar */}
           <JobFiltersSidebar filters={filters} setFilters={setFilters} />
           <JobList jobs={filteredJobs} />
         </div>

@@ -7,6 +7,8 @@ interface JobFiltersSidebarProps {
     category: string;
     mode: string;
     jobTypes: string[];
+    salary: number;
+    experience: string[];
   };
   setFilters: React.Dispatch<
     React.SetStateAction<{
@@ -15,18 +17,28 @@ interface JobFiltersSidebarProps {
       category: string;
       mode: string;
       jobTypes: string[];
+      salary: number;
+      experience: string[];
     }>
   >;
 }
 
 const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ filters, setFilters }) => {
   const jobTypes = ["Full-Time", "Part-Time", "Internship", "Contract"];
+  const experiences = ["Entry Level", "Mid Level", "Senior Level"];
 
   const handleJobTypeChange = (type: string) => {
-    const updatedJobTypes = filters.jobTypes.includes(type)
+    const updated = filters.jobTypes.includes(type)
       ? filters.jobTypes.filter((t) => t !== type)
       : [...filters.jobTypes, type];
-    setFilters({ ...filters, jobTypes: updatedJobTypes });
+    setFilters({ ...filters, jobTypes: updated });
+  };
+
+  const handleExperienceChange = (exp: string) => {
+    const updated = filters.experience.includes(exp)
+      ? filters.experience.filter((e) => e !== exp)
+      : [...filters.experience, exp];
+    setFilters({ ...filters, experience: updated });
   };
 
   return (
@@ -49,39 +61,50 @@ const JobFiltersSidebar: React.FC<JobFiltersSidebarProps> = ({ filters, setFilte
         ))}
       </div>
 
-      {/* Salary Filter (unchanged) */}
+      {/* ✅ Salary Dropdown with 'All' option */}
       <div className="mb-4">
-        <h4 className="font-medium mb-2">Salary Range</h4>
-        <select className="border border-gray-300 rounded-lg p-2 w-full">
-          <option>All</option>
-          <option>$40k - $60k</option>
-          <option>$60k - $80k</option>
-          <option>$80k - $100k</option>
+        <h4 className="font-medium mb-2">Minimum Salary</h4>
+        <select
+          value={filters.salary || ""}
+          onChange={(e) =>
+            setFilters({
+              ...filters,
+              salary: e.target.value ? Number(e.target.value) : null, // null means “no filter”
+            })
+          }
+          className="border border-gray-300 rounded-lg p-2 w-full text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          <option value="">All Salaries</option> {/* 👈 Blank Option */}
+          {[40, 50, 60, 70, 80, 90, 100,110,120,130,140,150,160].map((val) => (
+            <option key={val} value={val}>
+              ${val}k
+            </option>
+          ))}
         </select>
+
+        <p className="text-sm text-blue-600 font-semibold mt-1">
+          {filters.salary ? `Showing jobs above $${filters.salary}k` : "Showing all jobs"}
+        </p>
       </div>
 
-      {/* Experience (unchanged) */}
+
+      {/* ✅ Experience Filter */}
       <div className="mb-4">
         <h4 className="font-medium mb-2">Experience</h4>
-        {["Entry Level", "Mid Level", "Senior Level"].map((exp) => (
-          <label key={exp} className="block text-sm mb-1">
-            <input type="checkbox" className="mr-2" /> {exp}
+        {experiences.map((exp) => (
+          <label key={exp} className="block text-sm mb-1 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={filters.experience.includes(exp)}
+              onChange={() => handleExperienceChange(exp)}
+              className="mr-2 accent-blue-600 cursor-pointer"
+            />
+            {exp}
           </label>
         ))}
       </div>
 
-      {/* Career Level (unchanged) */}
-      <div className="mb-4">
-        <h4 className="font-medium mb-2">Career Level</h4>
-        <select className="border border-gray-300 rounded-lg p-2 w-full">
-          <option>All</option>
-          <option>Junior</option>
-          <option>Associate</option>
-          <option>Manager</option>
-        </select>
-      </div>
-
-      {/* Mode of Work (unchanged) */}
+      {/* ✅ Mode of Work */}
       <div className="mb-4">
         <h4 className="font-medium mb-2">Mode of Work</h4>
         <select
