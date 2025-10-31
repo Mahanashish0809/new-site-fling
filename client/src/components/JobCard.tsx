@@ -17,6 +17,7 @@ export interface Job {
   featured?: boolean;
   logo?: string;
   mode: string;
+  experience?: string;
 }
 
 interface JobCardProps {
