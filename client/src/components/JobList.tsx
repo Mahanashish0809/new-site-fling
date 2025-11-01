@@ -1,31 +1,52 @@
 import React from "react";
 import { JobCard, Job } from "./JobCard";
 
-interface Props {
+interface JobListProps {
   jobs: Job[];
+  filters: {
+    keyword: string;
+    location: string;
+    category: string;
+    mode: string;
+    jobTypes: string[];
+    salary: number | null;
+    experience: string[];
+  };
 }
 
-const JobList: React.FC<Props> = ({ jobs }) => {
+const JobList: React.FC<JobListProps> = ({ jobs, filters }) => {
   const [sortOption, setSortOption] = React.useState("Recommended");
 
-  // ✅ Sort jobs safely using existing fields
-  const sortedJobs = React.useMemo(() => {
-    const sorted = [...jobs];
+  const filteredJobs = jobs.filter((job) => {
+    const keywordMatch =
+      filters.keyword === "" ||
+      job.title.toLowerCase().includes(filters.keyword.toLowerCase()) ||
+      job.company.toLowerCase().includes(filters.keyword.toLowerCase()) ||
+      job.description.toLowerCase().includes(filters.keyword.toLowerCase());
 
+    const locationMatch =
+      filters.location === "" ||
+      job.location.toLowerCase().includes(filters.location.toLowerCase());
+
+    const experienceMatch =
+      filters.experience.length === 0 ||
+      filters.experience.includes(job.experience);
+
+    return keywordMatch && locationMatch && experienceMatch;
+  });
+
+  const sortedJobs = React.useMemo(() => {
+    const sorted = [...filteredJobs];
     if (sortOption === "Recent") {
-      // Example: sort by 'posted' string (you can adjust if you store timestamps)
       sorted.sort((a, b) => a.posted.localeCompare(b.posted));
     } else if (sortOption === "TopMatched") {
-      // Example: alphabetical sort by title
       sorted.sort((a, b) => a.title.localeCompare(b.title));
     }
-
     return sorted;
-  }, [sortOption, jobs]);
+  }, [sortOption, filteredJobs]);
 
   return (
     <div className="flex-1 flex flex-col gap-4">
-      {/* ✅ Sort dropdown aligned right */}
       <div className="flex justify-end mb-2">
         <select
           value={sortOption}
@@ -38,7 +59,6 @@ const JobList: React.FC<Props> = ({ jobs }) => {
         </select>
       </div>
 
-      {/* ✅ Job Cards */}
       {sortedJobs.length > 0 ? (
         sortedJobs.map((job) => <JobCard key={job.id} job={job} />)
       ) : (

@@ -5,9 +5,7 @@ import JobFiltersSidebar from "../components/JobFilterSidebar";
 import JobList from "../components/JobList";
 import { Job } from "../components/JobCard";
 
-import { Button } from "@/components/ui/button";
-
-// ✅ Helper: Decode JWT safely
+// ✅ Decode JWT safely
 const decodeToken = (token: string) => {
   try {
     const base64Url = token.split(".")[1];
@@ -72,7 +70,7 @@ const JobPage: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Filters (added salary dropdown + experience)
+  // ✅ Filters (includes salary dropdown + experience)
   const [filters, setFilters] = useState({
     keyword: "",
     location: "",
@@ -83,7 +81,7 @@ const JobPage: React.FC = () => {
     experience: [] as string[],
   });
 
-  // ✅ Job data (sample with experience)
+  // ✅ Job data (sample)
   const [jobs] = useState<Job[]>([
     {
       id: "1",
@@ -123,7 +121,6 @@ const JobPage: React.FC = () => {
     },
   ]);
 
-  // ✅ Clear filters
   const handleClear = () =>
     setFilters({
       keyword: "",
@@ -131,36 +128,13 @@ const JobPage: React.FC = () => {
       category: "",
       mode: "",
       jobTypes: [],
-     salary: null,
+      salary: null,
       experience: [],
     });
 
-  // ✅ Filtering Logic
-  const filteredJobs = jobs.filter((job) => {
-    // Mode filter
-    if (filters.mode && job.mode !== filters.mode) return false;
-
-    // Job Type filter
-    if (filters.jobTypes.length > 0 && !filters.jobTypes.includes(job.type)) return false;
-
-    // Experience filter
-    if (filters.experience.length > 0 && !filters.experience.includes(job.experience)) return false;
-
-    // Salary filter
-    if (filters.salary !== null) {
-    const salaryMatch = job.salary.match(/\$?(\d+)(k|K)/g);
-    if (salaryMatch) {
-      const nums = salaryMatch.map((s) => parseInt(s.replace(/\D/g, "")));
-      const minSalary = Math.min(...nums);
-      const maxSalary = Math.max(...nums);
-      const selected = filters.salary!;
-      if (selected < minSalary || selected > maxSalary) return false;
-    } else if (job.salary.includes("/hr")) {
-      return false; // skip hourly jobs
-    }
-  }
-    return true;
-  });
+  const handleSearch = (value: string) => {
+    setFilters((prev) => ({ ...prev, keyword: value }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -227,13 +201,13 @@ const JobPage: React.FC = () => {
         <JobSearchBar
           filters={filters}
           setFilters={setFilters}
-          onSearch={() => console.log("Searching with filters:", filters)}
+          onSearch={handleSearch}
           onClear={handleClear}
         />
 
         <div className="flex gap-6">
           <JobFiltersSidebar filters={filters} setFilters={setFilters} />
-          <JobList jobs={filteredJobs} />
+          <JobList jobs={jobs} filters={filters} />
         </div>
       </main>
     </div>
