@@ -1,15 +1,19 @@
 import React from "react";
 
-interface SearchFilters {
+interface Filters {
   keyword: string;
   location: string;
   category: string;
+  mode: string;
+  jobTypes: string[];
+  salary: number | null;
+  experience: string[];
 }
 
 interface Props {
-  filters: SearchFilters;
-  setFilters: React.Dispatch<React.SetStateAction<SearchFilters>>;
-  onSearch: () => void;
+  filters: Filters;
+  setFilters: React.Dispatch<React.SetStateAction<Filters>>;
+  onSearch: (value: string) => void;
   onClear: () => void;
 }
 
@@ -39,6 +43,7 @@ const JobSearchBar: React.FC<Props> = ({ filters, setFilters, onSearch, onClear 
           onChange={(e) => setFilters({ ...filters, category: e.target.value })}
         />
       </div>
+
       <div className="flex gap-3">
         <button
           onClick={onClear}
@@ -47,7 +52,7 @@ const JobSearchBar: React.FC<Props> = ({ filters, setFilters, onSearch, onClear 
           Clear
         </button>
         <button
-          onClick={onSearch}
+          onClick={() => onSearch(filters.keyword)}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
           Search
