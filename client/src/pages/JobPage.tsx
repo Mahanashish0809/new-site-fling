@@ -88,6 +88,7 @@ const JobPage: React.FC = () => {
       title: "Full Stack Developer",
       company: "Google",
       location: "San Francisco, CA",
+      category:"Web Development",
       type: "Full-Time",
       salary: "$100k - $120k",
       posted: "3 days ago",
@@ -98,6 +99,7 @@ const JobPage: React.FC = () => {
     {
       id: "2",
       title: "Backend Engineer",
+      category:"Software Development",
       company: "Amazon",
       location: "Austin, TX",
       type: "CO-OP",
@@ -110,6 +112,7 @@ const JobPage: React.FC = () => {
     {
       id: "3",
       title: "Data Analyst",
+      category:"Data Science",
       company: "Meta",
       location: "New York, NY",
       type: "Internship",
