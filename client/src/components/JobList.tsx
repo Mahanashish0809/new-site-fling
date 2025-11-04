@@ -15,52 +15,62 @@ interface JobListProps {
 }
 
 const JobList: React.FC<JobListProps> = ({ jobs, filters }) => {
-  const [sortOption, setSortOption] = React.useState("Recommended");
-
   const filteredJobs = jobs.filter((job) => {
+    // ✅ Keyword search (title, company, description)
     const keywordMatch =
-      filters.keyword === "" ||
+      !filters.keyword ||
       job.title.toLowerCase().includes(filters.keyword.toLowerCase()) ||
       job.company.toLowerCase().includes(filters.keyword.toLowerCase()) ||
       job.description.toLowerCase().includes(filters.keyword.toLowerCase());
 
+    // ✅ Location filter
     const locationMatch =
-      filters.location === "" ||
+      !filters.location ||
       job.location.toLowerCase().includes(filters.location.toLowerCase());
 
+    // ✅ Job type filter
+    const jobTypeMatch =
+      filters.jobTypes.length === 0 ||
+      filters.jobTypes.includes(job.type);
+
+    // ✅ Experience filter
     const experienceMatch =
       filters.experience.length === 0 ||
       filters.experience.includes(job.experience);
 
-    return keywordMatch && locationMatch && experienceMatch;
-  });
+    // ✅ Mode filter
+    const modeMatch =
+      !filters.mode || job.mode === filters.mode;
 
-  const sortedJobs = React.useMemo(() => {
-    const sorted = [...filteredJobs];
-    if (sortOption === "Recent") {
-      sorted.sort((a, b) => a.posted.localeCompare(b.posted));
-    } else if (sortOption === "TopMatched") {
-      sorted.sort((a, b) => a.title.localeCompare(b.title));
+    // ✅ Salary filter
+    let salaryMatch = true;
+    if (filters.salary !== null) {
+      // Extract numeric salary ranges
+      const match = job.salary.match(/\$?(\d+)/g);
+      if (match && match.length >= 1) {
+        const numbers = match.map((s) => parseInt(s.replace(/\D/g, ""), 10));
+        const minSalary = Math.min(...numbers);
+        const maxSalary = Math.max(...numbers);
+        salaryMatch =
+          filters.salary >= minSalary * 1000 && filters.salary <= maxSalary * 1000;
+      }
     }
-    return sorted;
-  }, [sortOption, filteredJobs]);
+
+    // ✅ Combine all filters
+    return (
+      keywordMatch &&
+      locationMatch &&
+      jobTypeMatch &&
+      experienceMatch &&
+      modeMatch &&
+      salaryMatch
+    );
+  });
 
   return (
     <div className="flex-1 flex flex-col gap-4">
-      <div className="flex justify-end mb-2">
-        <select
-          value={sortOption}
-          onChange={(e) => setSortOption(e.target.value)}
-          className="border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
-        >
-          <option value="Recommended">Recommended</option>
-          <option value="Recent">Recent</option>
-          <option value="TopMatched">Top Matched</option>
-        </select>
-      </div>
-
-      {sortedJobs.length > 0 ? (
-        sortedJobs.map((job) => <JobCard key={job.id} job={job} />)
+      {filteredJobs.length > 0 ? (
+        filteredJobs.map((job) => <JobCard key={job.id} job={job} />)
       ) : (
         <p className="text-gray-500 text-center py-8">No jobs found.</p>
       )}

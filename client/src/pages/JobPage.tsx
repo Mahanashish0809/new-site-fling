@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import JobSearchBar from "../components/JobSearchBar";
-import JobFiltersSidebar from "../components/JobFilterSidebar";
 import JobList from "../components/JobList";
 import { Job } from "../components/JobCard";
+import FiltersPopup from "../components/FiltersPop"; // ✅ add popup
 
 // ✅ Decode JWT safely
 const decodeToken = (token: string) => {
@@ -205,10 +205,32 @@ const JobPage: React.FC = () => {
           onClear={handleClear}
         />
 
-        <div className="flex gap-6">
-          <JobFiltersSidebar filters={filters} setFilters={setFilters} />
-          <JobList jobs={jobs} filters={filters} />
-        </div>
+        {/* ✅ Toolbar with sort + filters popup */}
+       {/* ✅ Toolbar row: Sort + Filters side by side */}
+<div className="flex justify-between items-center mb-4">
+  {/* Left side (optional placeholder for total results, etc.) */}
+  <div></div>
+
+  {/* Right side: Sort dropdown + Filters button */}
+  <div className="flex items-center gap-3">
+    <select
+      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+    >
+      <option>Recommended</option>
+      <option>Recent</option>
+      <option>Top Matched</option>
+    </select>
+
+    <FiltersPopup
+      filters={filters}
+      setFilters={setFilters}
+      onClear={handleClear}
+    />
+  </div>
+</div>
+
+        {/* ✅ Job list only (removed sidebar) */}
+        <JobList jobs={jobs} filters={filters} />
       </main>
     </div>
   );
