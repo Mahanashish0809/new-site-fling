@@ -10,6 +10,7 @@ export interface Job {
   title: string;
   company: string;
   location: string;
+  category: string;
   type: string;
   salary: string;
   posted: string;
