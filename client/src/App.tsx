@@ -17,6 +17,7 @@ import OtpPage from "./pages/OtpPage";
 import JobPage from "./pages/JobPage";
 import Contact from "./pages/contact";
 import About from "./pages/About";
+import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const AppRoutes = () => {
       {/* ✅ Public pages */}
       <Route path="/contact" element={<Contact />} />
       <Route path="/about" element={<About />} />
+        <Route path="/settings" element={<SettingsPage />} />
 
       {/* ✅ 404 */}
       <Route path="*" element={<NotFound />} />
