@@ -37,45 +37,56 @@ def get_db_connection():
             user=os.getenv("PG_USER"),
             password=os.getenv("PG_PASS"),
             port=os.getenv("PG_PORT", 5432),
-            cursor_factory=RealDictCursor  # returns dict instead of tuples
+            sslmode="require",
+            cursor_factory=RealDictCursor  # ✅ add this here
         )
         return conn
     except Exception as e:
         print("❌ Database connection failed:", e)
         return None
 
+
 # 🔹 API endpoint to get jobs
 @app.route("/api/jobs")
 def get_jobs():
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({"error": "Database connection failed"}), 500
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
 
-    cur = conn.cursor()
-    # ✅ Fetch data from your new table
-    cur.execute("""
-        SELECT job_id, title, location, department, date_posted, job_url
-        FROM greenhouse_jobs
-        ORDER BY date_posted DESC
-        LIMIT 20;
-    """)
-    rows = cur.fetchall()
-    cur.close()
-    conn.close()
+        # ✅ Make sure you use RealDictCursor here too
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT job_id, company_name, title, location, job_url, updated_at
+            FROM greenhouse_jobs
+            ORDER BY updated_at DESC
+            LIMIT 20;
+        """)
+        rows = cur.fetchall()
+        print("Rows fetched:", len(rows))
+        print("First row sample:", rows[0] if rows else None)
 
-    # Convert rows into JSON
-    jobs = [
-        {
-            "job_id": r[0],
-            "title": r[1],
-            "location": r[2],
-            "department": r[3],
-            "date_posted": str(r[4]),
-            "url": r[5]
-        }
-        for r in rows
-    ]
-    return jsonify(jobs)
+        cur.close()
+        conn.close()
+
+        # ✅ Access values by key instead of index
+        jobs = [
+            {
+                "job_id": r["job_id"],
+                "company_name": r["company_name"],
+                "title": r["title"],
+                "location": r["location"],
+                "job_url": r["job_url"],
+                "updated_at": str(r["updated_at"])
+            }
+            for r in rows
+        ]
+
+        return jsonify(jobs)
+
+    except Exception as e:
+        print("🔥 ERROR:", e)
+        return jsonify({"error": str(e)}), 500
 
 # 🔹 Root route for testing
 @app.route("/")
