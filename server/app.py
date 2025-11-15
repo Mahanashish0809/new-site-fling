@@ -4,16 +4,18 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 import os
-
+from flask_cors import CORS
 from dotenv import load_dotenv, find_dotenv
 import os
 
+app = Flask(__name__)
+CORS(app)
 # 🔹 This finds the .env file anywhere above your current directory
 env_path = find_dotenv()
 if not env_path:
-    print("❌  No .env file found!")
+    print("No .env file found!")
 else:
-    print(f"✅  Loading .env from: {env_path}")
+    print(f"Loading .env from: {env_path}")
     load_dotenv(env_path)
 
 print("PG_DB:", os.getenv("PG_DB"))
@@ -22,11 +24,6 @@ print("PG_HOST:", os.getenv("PG_HOST"))
 load_dotenv(dotenv_path=env_path)
 print("PG_DB:", os.getenv("PG_DB"))
 print("PG_HOST:", os.getenv("PG_HOST"))
-
-
-
-# 🔹 Initialize Flask app
-app = Flask(__name__)
 
 # 🔹 Database connection function
 def get_db_connection():
@@ -38,11 +35,11 @@ def get_db_connection():
             password=os.getenv("PG_PASS"),
             port=os.getenv("PG_PORT", 5432),
             sslmode="require",
-            cursor_factory=RealDictCursor  # ✅ add this here
+            cursor_factory=RealDictCursor  # add this here
         )
         return conn
     except Exception as e:
-        print("❌ Database connection failed:", e)
+        print("Database connection failed:", e)
         return None
 
 
@@ -54,7 +51,7 @@ def get_jobs():
         if not conn:
             return jsonify({"error": "Database connection failed"}), 500
 
-        # ✅ Make sure you use RealDictCursor here too
+        # Make sure you use RealDictCursor here too
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
             SELECT job_id, company_name, title, location, job_url, updated_at
@@ -69,7 +66,7 @@ def get_jobs():
         cur.close()
         conn.close()
 
-        # ✅ Access values by key instead of index
+        # Access values by key instead of index
         jobs = [
             {
                 "job_id": r["job_id"],
@@ -85,13 +82,13 @@ def get_jobs():
         return jsonify(jobs)
 
     except Exception as e:
-        print("🔥 ERROR:", e)
+        print("ERROR:", e)
         return jsonify({"error": str(e)}), 500
 
 # 🔹 Root route for testing
 @app.route("/")
 def home():
-    return "<h3>✅ Flask Job API is running — visit /api/jobs</h3>"
+    return "<h3>Flask Job API is running — visit /api/jobs</h3>"
 
 # 🔹 Run server
 if __name__ == "__main__":
