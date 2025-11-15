@@ -1,10 +1,12 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, DollarSign, Home, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
+import { DollarSign, MapPin, Home, Clock } from "lucide-react";
 
+// Job interface is defined here – do NOT import it
 export interface Job {
   id: string;
   title: string;
@@ -30,7 +32,7 @@ export const JobCard = ({ job }: JobCardProps) => {
 
   const handleApply = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    toast.success(`Application submitted for ${job.title}!`);
+    toast.success(`Application submitted for ${job.title}`);
   };
 
   return (
@@ -38,7 +40,6 @@ export const JobCard = ({ job }: JobCardProps) => {
       onClick={() => navigate(`/job/${job.id}`)}
       className="w-full flex flex-col p-5 border border-gray-200 rounded-lg hover:shadow-md transition cursor-pointer"
     >
-      {/* HEADER */}
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -51,7 +52,6 @@ export const JobCard = ({ job }: JobCardProps) => {
           <p className="text-sm text-gray-500">{job.company}</p>
         </div>
 
-        {/* Optional Logo */}
         {job.logo && (
           <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-xl font-bold text-primary">
             {job.logo}
@@ -59,7 +59,6 @@ export const JobCard = ({ job }: JobCardProps) => {
         )}
       </div>
 
-      {/* INLINE JOB DETAILS */}
       <div className="flex flex-wrap gap-6 mt-3 text-sm text-gray-600">
         <div className="flex items-center gap-1">
           <DollarSign className="w-4 h-4 text-gray-500" />
@@ -79,12 +78,10 @@ export const JobCard = ({ job }: JobCardProps) => {
         </div>
       </div>
 
-      {/* DESCRIPTION */}
       <p className="text-sm text-gray-700 mt-3 line-clamp-2">
-        {job.description}
+        {job.description || "No description provided."}
       </p>
 
-      {/* ✅ BUTTONS — ALIGNED TO BOTTOM-RIGHT */}
       <div className="flex justify-end gap-3 mt-5">
         <Button
           size="sm"
