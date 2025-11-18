@@ -7,32 +7,17 @@ dotenv.config();
 
 const app = express();
 
-// Enable CORS for all origins (add this before routes)
+// Enable CORS for all origins (development mode)
 app.use(cors({
-  origin: [
-    "https://joltq2025.web.app",        // your Firebase Hosting domain
-    "https://joltq2025.firebaseapp.com",// Firebase default domain
-    "http://localhost:8080"            // local dev
-  ],  // allow all origins for testing
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: true,  // Allow all origins for development
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
 
 // Enable JSON body parsing
 app.use(express.json());
 
-// --- Example route ---
-app.post("/api/auth/firebase-login", async (req, res) => {
-  try {
-    const { token } = req.body;
-    const decoded = await admin.auth().verifyIdToken(token);
-    res.json({ user: decoded, message: "Token verified" });
-  } catch (err) {
-    res.status(401).json({ error: err.message });
-  }
-});
-
-// --- Your existing routes ---
+// --- Auth routes (handles all /api/auth/* endpoints) ---
 import authRoutes from "./routes/auth.js";
 app.use("/api/auth", authRoutes);
 

@@ -64,6 +64,24 @@ node_modules/
 
 # dotenv environment variables file
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+server/.env
+client/.env
+
+# Firebase service account (contains private keys)
+serviceAccount.json
+server/serviceAccount.json
+**/serviceAccount*.json
 
 # dataconnect generated files
 .dataconnect
+
+
+# .idea folder
+.idea
+
+# vs code
+.vscode
