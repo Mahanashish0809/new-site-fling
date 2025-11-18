@@ -11,10 +11,11 @@ model User {
   id            Int       @id @default(autoincrement())
   email         String    @unique
   username      String
-  password      String
+  password      String?   // Optional for OAuth users (Google, etc.)
   createdAt     DateTime  @default(now())
   isVerified    Boolean   @default(false)
   otpCode       String?   // stores OTP temporarily
   otpExpiresAt  DateTime? // when the OTP expires
+  authProvider  String    @default("email") // "email", "google", "facebook", etc.
 }
 
