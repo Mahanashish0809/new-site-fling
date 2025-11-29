@@ -49,23 +49,74 @@ router.post("/firebase-login", async (req, res) => {
     const { token } = req.body;
     if (!token) return res.status(400).json({ error: "Missing token" });
 
+    // Verify Firebase ID token
     const decoded = await admin.auth().verifyIdToken(token);
     const email = decoded.email;
+    const providerId = decoded.firebase.sign_in_provider; // "google.com", "password", etc.
 
+    if (!email) {
+      return res.status(400).json({ error: "Email not found in token" });
+    }
+
+    // Check if user exists
     let user = await prisma.user.findUnique({ where: { email } });
+    
     if (!user) {
+      // Create new user
+      const isOAuth = providerId === "google.com";
       user = await prisma.user.create({
         data: {
           email,
           username: decoded.name || email.split("@")[0],
+          // For OAuth users, password is null
+          password: isOAuth ? null : null,
+          // OAuth users are auto-verified
+          isVerified: isOAuth,
+          authProvider: isOAuth ? "google" : "email",
         },
       });
+      console.log(`✅ New user created via ${providerId}:`, email);
+    } else {
+      // Update user if they signed in via OAuth and weren't verified before
+      if (providerId === "google.com" && !user.isVerified) {
+        user = await prisma.user.update({
+          where: { email },
+          data: { 
+            isVerified: true,
+            authProvider: "google",
+          },
+        });
+        console.log(`✅ User auto-verified via Google OAuth:`, email);
+      }
     }
 
-    return res.json({ success: true, user });
+    // Generate JWT token for our own auth system
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not configured");
+    }
+    const jwtToken = jwt.sign(
+      { userId: user.id, email: user.email, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({ 
+      success: true, 
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        isVerified: user.isVerified,
+      },
+      token: jwtToken,
+      provider: providerId,
+    });
   } catch (err) {
     console.error("Firebase verify error:", err);
-    return res.status(500).json({ error: "Failed to verify Firebase token", details: err.message });
+    return res.status(500).json({ 
+      error: "Failed to verify Firebase token", 
+      details: process.env.NODE_ENV === "development" ? err.message : undefined 
+    });
   }
 });
 
@@ -98,7 +149,14 @@ router.post("/signup", async (req, res) => {
       });
     } else {
       user = await prisma.user.create({
-        data: { email, username, password: hashed, otpCode: otp, otpExpiresAt },
+        data: { 
+          email, 
+          username, 
+          password: hashed, 
+          otpCode: otp, 
+          otpExpiresAt,
+          authProvider: "email",
+        },
       });
     }
 
@@ -205,16 +263,31 @@ router.post("/login", async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(404).json({ error: "User not found" });
+    
+    // Check if user signed up with OAuth
+    if (user.authProvider !== "email") {
+      return res.status(400).json({ 
+        error: `This account uses ${user.authProvider} sign-in. Please use "Sign in with Google" button.` 
+      });
+    }
+    
     if (!user.isVerified)
       return res.status(403).json({ error: "Please verify your email first." });
+
+    if (!user.password) {
+      return res.status(400).json({ error: "Invalid account state. Please contact support." });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
 
     // ✅ Include username in JWT payload
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not configured");
+    }
     const token = jwt.sign(
       { userId: user.id, email: user.email, username: user.username },
-      process.env.JWT_SECRET || "supersecretkey",
+      process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
