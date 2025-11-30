@@ -16,6 +16,8 @@ app.use(cors({
 
 // Enable JSON body parsing
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // --- Auth routes (handles all /api/auth/* endpoints) ---
 import authRoutes from "./routes/auth.js";

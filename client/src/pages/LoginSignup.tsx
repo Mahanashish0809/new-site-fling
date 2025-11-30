@@ -77,7 +77,11 @@ const LoginSignup: React.FC = () => {
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const firebaseToken = await result.user.getIdToken();
+      const user = result.user;
+      const firebaseToken = await user.getIdToken();
+
+      console.log("Google user:", user);
+      console.log("Firebase token:", firebaseToken);
 
       // Send Firebase token to backend for verification and user creation
       const res = await fetch(`${import.meta.env.VITE_API_URL}api/auth/firebase-login`, {
