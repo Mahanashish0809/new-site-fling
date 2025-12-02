@@ -30,7 +30,7 @@ def universal_extract(html, base_url):
     patterns = [
         r"software engineer", r"developer", r"intern",
         r"manager", r"scientist", r"analyst",
-        r"designer", r"architect", r"marketing", r"customer service representative"
+        r"designer", r"architect", r"marketing", r"customer service representative",r"Senior Data Engineer"
     ]
 
     for pat in patterns:

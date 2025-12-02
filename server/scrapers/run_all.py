@@ -9,7 +9,6 @@ async def run_all():
 
     file_path = os.path.join(os.path.dirname(__file__), "job_links.json")
     with open(file_path, "r") as f:
-        
         urls = json.load(f)
 
     print("URLs loaded:", urls)
@@ -18,17 +17,24 @@ async def run_all():
         print("No URLs found in job_links.json!")
         return []
 
-    results = []
+    all_jobs = []
 
     # Scrape each URL
     for url in urls:
         print(f"Scraping: {url}")
         jobs = await scrape_url(url)
         print(f"Found {len(jobs)} jobs")
-        results.extend(jobs)
 
-    print("TOTAL JOBS:", len(results))
-    return results
+        all_jobs.extend(jobs)
+
+    print("\n===============================")
+    print(f"TOTAL JOBS SCRAPED: {len(all_jobs)}")
+    print("===============================\n")
+
+    # No Node backend — saving handled inside scraper.py
+    print("💾 Jobs already saved directly to AWS PostgreSQL inside scraper.py")
+
+    return all_jobs
 
 
 if __name__ == "__main__":
