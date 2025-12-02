@@ -1,0 +1,314 @@
+import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import { PrismaClient } from "@prisma/client";
+
+import admin from "../firebaseAdmin.js";
+import verifyToken from "../middleware/authMiddleware.js";
+
+
+const router = express.Router();
+const prisma = new PrismaClient();
+
+// --- Gmail transporter (requires App Password from Gmail account) ---
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+
+// --- OTP generator ---
+const genOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
+const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+// --- Helper to send OTP mail ---
+async function sendOtpEmail(receiverEmail, otp) {
+  const mailOptions = {
+    from: `"JoltQ Verification" <${process.env.EMAIL_USER}>`, // Sender Gmail
+    to: receiverEmail, // Receiver = user email
+    subject: "Your JoltQ Verification Code",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2 style="color:#2563eb;">Verify Your Account</h2>
+        <p>Hello,</p>
+        <p>Your One-Time Password (OTP) for verifying your JoltQ account is:</p>
+        <h1 style="letter-spacing: 4px; color:#2563eb;">${otp}</h1>
+        <p>This OTP will expire in 10 minutes. Please do not share it with anyone.</p>
+        <p>Regards,<br/>The JoltQ Team</p>
+      </div>
+    `,
+  };
+
+  return transporter.sendMail(mailOptions);
+}
+
+router.post("/firebase-login", async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: "Missing token" });
+
+    // Verify Firebase ID token
+    const decoded = await admin.auth().verifyIdToken(token);
+    const email = decoded.email;
+    const providerId = decoded.firebase.sign_in_provider; // "google.com", "password", etc.
+
+    if (!email) {
+      return res.status(400).json({ error: "Email not found in token" });
+    }
+
+    // Check if user exists
+    let user = await prisma.user.findUnique({ where: { email } });
+    
+    if (!user) {
+      // Create new user
+      const isOAuth = providerId === "google.com";
+      user = await prisma.user.create({
+        data: {
+          email,
+          username: decoded.name || email.split("@")[0],
+          // For OAuth users, password is null
+          password: isOAuth ? null : null,
+          // OAuth users are auto-verified
+          isVerified: isOAuth,
+          authProvider: isOAuth ? "google" : "email",
+        },
+      });
+      console.log(`✅ New user created via ${providerId}:`, email);
+    } else {
+      // Update user if they signed in via OAuth and weren't verified before
+      if (providerId === "google.com" && !user.isVerified) {
+        user = await prisma.user.update({
+          where: { email },
+          data: { 
+            isVerified: true,
+            authProvider: "google",
+          },
+        });
+        console.log(`✅ User auto-verified via Google OAuth:`, email);
+      }
+    }
+
+    // Generate JWT token for our own auth system
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not configured");
+    }
+    const jwtToken = jwt.sign(
+      { userId: user.id, email: user.email, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({ 
+      success: true, 
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        isVerified: user.isVerified,
+      },
+      token: jwtToken,
+      provider: providerId,
+    });
+  } catch (err) {
+    console.error("Firebase verify error:", err);
+    return res.status(500).json({ 
+      error: "Failed to verify Firebase token", 
+      details: process.env.NODE_ENV === "development" ? err.message : undefined 
+    });
+  }
+});
+
+// ---------------- SIGNUP ----------------
+router.post("/signup", async (req, res) => {
+  try {
+    const { email, username, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ error: "Email and password required" });
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing && existing.isVerified)
+      return res.status(400).json({ error: "User already exists" });
+
+    const otp = genOtp();
+    const otpExpiresAt = new Date(Date.now() + OTP_TTL_MS);
+    const hashed = await bcrypt.hash(password, 10);
+
+    let user;
+    if (existing && !existing.isVerified) {
+      user = await prisma.user.update({
+        where: { email },
+        data: {
+          username: username ?? existing.username,
+          password: hashed,
+          otpCode: otp,
+          otpExpiresAt,
+          isVerified: false,
+        },
+      });
+    } else {
+      user = await prisma.user.create({
+        data: { 
+          email, 
+          username, 
+          password: hashed, 
+          otpCode: otp, 
+          otpExpiresAt,
+          authProvider: "email",
+        },
+      });
+    }
+
+    // Respond first (for better UX)
+    res.status(201).json({
+      message: "User created. OTP sent to your email for verification.",
+    });
+
+    // Send OTP email asynchronously
+    try {
+      await sendOtpEmail(email, otp);
+      console.log(`✅ OTP email sent successfully to ${email}`);
+    } catch (mailErr) {
+      console.error(`❌ Failed to send OTP email to ${email}:`, mailErr);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { /* optional: emailSendFailed: true */ },
+      });
+    }
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ---------------- RESEND OTP ----------------
+router.post("/resend-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) return res.status(400).json({ error: "Email required" });
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.isVerified) {
+      return res.status(400).json({ error: "User already verified" });
+    }
+
+    // Generate new OTP and expiry time
+    const newOtp = genOtp();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+
+    // Update user record
+    await prisma.user.update({
+      where: { email },
+      data: {
+        otpCode: newOtp,
+        otpExpiresAt,
+      },
+    });
+
+    // Send OTP email
+    await sendOtpEmail(email, newOtp);
+    // Return response
+    res.status(200).json({
+      message: "New OTP sent successfully",
+      ...(import.meta.env?.MODE !== "production" && { devOtp: newOtp }), // show OTP only in dev
+    });
+  } catch (err) {
+    console.error("Resend OTP error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ---------------- VERIFY OTP ----------------
+router.post("/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp)
+      return res.status(400).json({ error: "Email and OTP required" });
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.isVerified)
+      return res.status(400).json({ error: "User already verified" });
+    if (!user.otpCode || !user.otpExpiresAt)
+      return res.status(400).json({ error: "No active OTP. Request a new one." });
+    if (new Date() > user.otpExpiresAt){
+      await prisma.user.delete({
+      where: { email: email },
+    });
+      return res.status(400).json({ error: "OTP expired" });
+    }
+    if (user.otpCode !== otp)
+      return res.status(400).json({ error: "Invalid OTP" });
+
+    await prisma.user.update({
+      where: { email },
+      data: { isVerified: true, otpCode: null, otpExpiresAt: null },
+    });
+
+    res.json({ message: "Email verified successfully!" });
+  } catch (err) {
+    console.error("Verify OTP error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ---------------- LOGIN ----------------
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    
+    // Check if user signed up with OAuth
+    if (user.authProvider !== "email") {
+      return res.status(400).json({ 
+        error: `This account uses ${user.authProvider} sign-in. Please use "Sign in with Google" button.` 
+      });
+    }
+    
+    if (!user.isVerified)
+      return res.status(403).json({ error: "Please verify your email first." });
+
+    if (!user.password) {
+      return res.status(400).json({ error: "Invalid account state. Please contact support." });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+
+    // ✅ Include username in JWT payload
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET is not configured");
+    }
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: { id: user.id, email: user.email, username: user.username },
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+// ---------------- PROFILE (Protected) ----------------
+router.get("/profile", verifyToken, async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  res.json(user);
+});
+
+export default router;
