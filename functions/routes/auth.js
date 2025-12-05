@@ -3,8 +3,10 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { PrismaClient } from "@prisma/client";
-import { verifyToken } from "../middleware/authMiddleware.js";
+
 import admin from "../firebaseAdmin.js";
+import verifyToken from "../middleware/authMiddleware.js";
+
 
 const router = express.Router();
 const prisma = new PrismaClient();

@@ -13,6 +13,9 @@ import {
 import { auth, googleProvider } from "../firebase"; // ✅ ensure correct firebase import path
 
 const LoginSignup: React.FC = () => {
+  const BASE_URL = window.location.hostname === "localhost"
+  ? import.meta.env.VITE_API_URL
+  : import.meta.env.VITE_FIREBASE_API;
   const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,7 +38,7 @@ const LoginSignup: React.FC = () => {
         const userCred = await signInWithEmailAndPassword(auth, form.email, form.password);
         const firebaseToken = await userCred.user.getIdToken();
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}api/auth/firebase-login`, {
+        const res = await fetch(`${BASE_URL}api/auth/firebase-login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: firebaseToken }),
@@ -53,7 +56,7 @@ const LoginSignup: React.FC = () => {
         const userCred = await createUserWithEmailAndPassword(auth, form.email, form.password);
         const firebaseToken = await userCred.user.getIdToken();
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}api/auth/firebase-login`, {
+        const res = await fetch(`${BASE_URL}api/auth/firebase-login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: firebaseToken }),
@@ -84,7 +87,7 @@ const LoginSignup: React.FC = () => {
       console.log("Firebase token:", firebaseToken);
 
       // Send Firebase token to backend for verification and user creation
-      const res = await fetch(`${import.meta.env.VITE_API_URL}api/auth/firebase-login`, {
+      const res = await fetch(`${BASE_URL}api/auth/firebase-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: firebaseToken }),
