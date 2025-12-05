@@ -28,3 +28,6 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+import scrapeRoutes from "./routes/scrape.js";
+app.use("/api/scrape", scrapeRoutes);
+
