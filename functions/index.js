@@ -1,37 +1,33 @@
-// --- clean starter index.js ---
-const functions = require("firebase-functions");
-const express = require("express");
-const cors = require("cors");
-const admin = require("firebase-admin");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import admin from "./firebaseAdmin.js";
+import authRoutes from "./routes/auth.js";
+import * as functions from "firebase-functions";
+import { onRequest } from "firebase-functions/v2/https";
 
-admin.initializeApp();
+
+
+
+dotenv.config();
 
 const app = express();
 
-app.use(
-    cors({
-      origin: [
-        "http://localhost:8080",
-        "https://joltq2025.web.app",
-        "https://joltq2025.firebaseapp.com",
-      ],
-      methods: ["GET", "POST", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-    }),
-);
-// allow pre-flight checks
-app.options("*", cors());
-app.use(cors());
-// app.use(express.json());
+// CORS
+app.use(cors({ origin: true, credentials: true }));
 
-app.post("/api/auth/firebase-login", async (req, res) => {
-  try {
-    const {token} = req.body;
-    const decoded = await admin.auth().verifyIdToken(token);
-    res.json({user: decoded, message: "Token verified ✅"});
-  } catch (err) {
-    res.status(401).json({error: err.message});
-  }
-});
+// Body parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-exports.api = functions.https.onRequest(app);
+// Routes
+app.use("/api/auth", authRoutes);
+
+// ---- LOCAL DEVELOPMENT ONLY ----
+if (!process.env.FUNCTIONS_EMULATOR) {
+    const PORT = process.env.LOCAL_HOST || 3001;
+    app.listen(PORT, () => console.log("Local Dev Server:", PORT));
+}
+
+// ---- CLOUD FUNCTION EXPORT ----
+export const api = onRequest(app);
