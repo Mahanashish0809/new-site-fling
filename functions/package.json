@@ -18,7 +18,7 @@
     "seed": "prisma db seed",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "scrape": "python3 scrapers/run_all.py"
+    "scrape": "cd scrapers && ../venv/bin/python3 run_all.py"
   },
   "name": "functions",
   "engines": {

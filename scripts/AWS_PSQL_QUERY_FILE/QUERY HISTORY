@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS greenhouse_jobs (
     job_id BIGINT PRIMARY KEY,
-    company_name VARCHAR(100),
+    company_name VARCHAR(150),
     title VARCHAR(255),
     location VARCHAR(255),
     job_url TEXT,
     updated_at TIMESTAMPTZ,
-    raw_data JSONB -- Good practice to store the original JSON
+    raw_data JSONB
 );
 
--- Optional: Create an index for faster sorting by date
-CREATE INDEX IF NOT EXISTS idx_jobs_updated_at ON greenhouse_jobs (updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_greenhouse_updated_at 
+    ON greenhouse_jobs(updated_at DESC);

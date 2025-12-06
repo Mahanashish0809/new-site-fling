@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import re
 
 ###########################################################
-# WORKDAY (HTML fallback ONLY — API handles real scraping)
+# WORKDAY (HTML fallback ONLY)
 ###########################################################
 def extract_workday_jobs(html, base_url):
     soup = BeautifulSoup(html, "lxml")
@@ -12,15 +12,11 @@ def extract_workday_jobs(html, base_url):
     for a in soup.select("a[href*='/job/']"):
         title = a.get_text(strip=True)
         href = a.get("href")
-
         if not title or not href:
             continue
-
         if href.startswith("/"):
             href = base_url.rstrip("/") + href
-
         jobs.append({"title": title, "url": href})
-
     return jobs
 
 
@@ -34,12 +30,9 @@ def extract_greenhouse_jobs(html, base_url):
     for a in soup.select("a[href*='greenhouse.io'][href*='/jobs/']"):
         title = a.get_text(strip=True)
         href = a.get("href")
-
         if not title or not href:
             continue
-
         jobs.append({"title": title, "url": href})
-
     return jobs
 
 
@@ -49,16 +42,12 @@ def extract_greenhouse_jobs(html, base_url):
 def extract_lever_jobs(html, base_url):
     soup = BeautifulSoup(html, "lxml")
     jobs = []
-
     for a in soup.select("a[href*='jobs.lever.co']"):
         title = a.get_text(strip=True)
         href = a.get("href")
-
         if not title or not href:
             continue
-
         jobs.append({"title": title, "url": href})
-
     return jobs
 
 
@@ -76,12 +65,9 @@ def extract_oracle_jobs(html, base_url):
 
         if not title or not href:
             continue
-
         if href.startswith("/"):
             href = base_url.rstrip("/") + href
-
         jobs.append({"title": title, "url": href})
-
     return jobs
 
 
@@ -91,16 +77,12 @@ def extract_oracle_jobs(html, base_url):
 def extract_successfactors_jobs(html, base_url):
     soup = BeautifulSoup(html, "lxml")
     jobs = []
-
     for a in soup.select("a[href*='career'], a[href*='careersection'], a[href*='jobId=']"):
         title = a.get_text(strip=True)
         href = a.get("href")
-
         if not title or not href:
             continue
-
         jobs.append({"title": title, "url": href})
-
     return jobs
 
 
@@ -110,16 +92,12 @@ def extract_successfactors_jobs(html, base_url):
 def extract_icims_jobs(html, base_url):
     soup = BeautifulSoup(html, "lxml")
     jobs = []
-
     for a in soup.select("a[href*='icims'][href*='jobs']"):
         title = a.get_text(strip=True)
         href = a.get("href")
-
         if not title or not href:
             continue
-
         jobs.append({"title": title, "url": href})
-
     return jobs
 
 
@@ -129,16 +107,12 @@ def extract_icims_jobs(html, base_url):
 def extract_smartrecruiters_jobs(html, base_url):
     soup = BeautifulSoup(html, "lxml")
     jobs = []
-
     for a in soup.select("a[href*='smartrecruiters'][href*='job']"):
         title = a.get_text(strip=True)
         href = a.get("href")
-
         if not title or not href:
             continue
-
         jobs.append({"title": title, "url": href})
-
     return jobs
 
 
@@ -148,49 +122,40 @@ def extract_smartrecruiters_jobs(html, base_url):
 def extract_workable_jobs(html, base_url):
     soup = BeautifulSoup(html, "lxml")
     jobs = []
-
     for a in soup.select("a[href*='workable'][href*='apply'], a[href*='workable'][href*='job']"):
         title = a.get_text(strip=True)
         href = a.get("href")
-
         if not title or not href:
             continue
-
         jobs.append({"title": title, "url": href})
-
     return jobs
 
 
 ###########################################################
-# GENERIC FALLBACK EXTRACTOR
+# GENERIC FALLBACK
 ###########################################################
 def extract_generic_jobs(html, base_url):
     soup = BeautifulSoup(html, "lxml")
     jobs = []
 
-    # Broad job-like link detection
-    keywords = ["job", "role", "position", "career", "apply", "opening", "opportunity", "vacancy"]
-
+    keywords = ["job", "role", "position", "career", "apply", "opening", "opportunity"]
     selector = ",".join([f"a[href*='{kw}']" for kw in keywords])
     links = soup.select(selector)
 
     for a in links:
         title = a.get_text(strip=True)
         href = a.get("href")
-
         if not title or not href:
             continue
-
         if href.startswith("/"):
             href = base_url.rstrip("/") + href
-
         jobs.append({"title": title, "url": href})
 
     return remove_duplicates(jobs)
 
 
 ###########################################################
-# HELPERS
+# UTILS
 ###########################################################
 def remove_duplicates(jobs):
     seen = {}

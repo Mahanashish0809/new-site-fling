@@ -1,41 +1,25 @@
 # run_all.py
 import json
 import asyncio
-from scraper import scrape_url
 import os
+from scraper import scrape_url
 
 async def run_all():
     print("Loading job_links.json...")
 
     file_path = os.path.join(os.path.dirname(__file__), "job_links.json")
-    with open(file_path, "r") as f:
-        urls = json.load(f)
+    urls = json.load(open(file_path))
 
-    print("URLs loaded:", urls)
+    print(f"URLs loaded: {len(urls)}\n")
 
-    if not urls:
-        print("No URLs found in job_links.json!")
-        return []
-
-    all_jobs = []
-
-    # Scrape each URL
     for url in urls:
-        print(f"Scraping: {url}")
+        print(f"\nScraping: {url}")
         jobs = await scrape_url(url)
+        jobs = jobs or []   # <--- FIXED
+
         print(f"Found {len(jobs)} jobs")
 
-        all_jobs.extend(jobs)
-
-    print("\n===============================")
-    print(f"TOTAL JOBS SCRAPED: {len(all_jobs)}")
-    print("===============================\n")
-
-    # No Node backend — saving handled inside scraper.py
-    print("💾 Jobs already saved directly to AWS PostgreSQL inside scraper.py")
-
-    return all_jobs
-
+    print("\n=== FINISHED SCRAPING ===")
 
 if __name__ == "__main__":
     asyncio.run(run_all())
