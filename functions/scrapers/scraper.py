@@ -52,17 +52,15 @@ def save_jobs_to_db(job_list):
     saved = 0
 
     for job in job_list:
-
-        # --------------------------------------------------
-        # 1. Ensure job_id always exists — FIX FOR ALL ATS
-        # --------------------------------------------------
+        # -------------------------------
+        # FIX: Ensure every job has job_id
+        # -------------------------------
         job_id = job.get("job_id")
 
         if not job_id:
-            # fallback deterministic key = url or title
-            key = (job.get("url") or job.get("title") or json.dumps(job))
+            # fallback: stable hash using (url or title)
+            key = job.get("url") or job.get("title") or str(job)
             job_id = make_job_id("fallback", key)
-            job["job_id"] = job_id  # <-- add into job object
 
         company = job.get("company_name", "Unknown")
         title = job.get("title")
@@ -72,14 +70,15 @@ def save_jobs_to_db(job_list):
         raw_json = json.dumps(job)
 
         try:
-            cur.execute(query, (
-                job_id, company, title, location, job_url, updated_at, raw_json
-            ))
+            cur.execute(
+                query,
+                (job_id, company, title, location, job_url, updated_at, raw_json),
+            )
             saved += 1
 
         except Exception as e:
             print("DB Error:", e)
-            print("FAILED JOB:", job)
+            print("Failed Job:", job)
             continue
 
     conn.commit()
@@ -87,8 +86,6 @@ def save_jobs_to_db(job_list):
     conn.close()
 
     print(f"✅ Saved {saved} jobs to AWS PostgreSQL.")
-
-
 
 # -----------------------------------------------------------
 # WORKDAY NETWORK INTERCEPT (last 24h)
