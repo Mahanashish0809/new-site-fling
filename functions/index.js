@@ -5,9 +5,7 @@ import admin from "./firebaseAdmin.js";
 import authRoutes from "./routes/auth.js";
 import * as functions from "firebase-functions";
 import { onRequest } from "firebase-functions/v2/https";
-
-
-
+import scrapeRoutes from "./routes/scrape.js";
 
 dotenv.config();
 
@@ -22,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/scrape", scrapeRoutes);
 
 // ---- LOCAL DEVELOPMENT ONLY ----
 if (!process.env.FUNCTIONS_EMULATOR) {
