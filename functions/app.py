@@ -51,30 +51,26 @@ def get_jobs():
         if not conn:
             return jsonify({"error": "Database connection failed"}), 500
 
-        # Make sure you use RealDictCursor here too
         cur = conn.cursor(cursor_factory=RealDictCursor)
         cur.execute("""
-            SELECT job_id, company_name, title, location, job_url, updated_at
+            SELECT job_id, company_name, title, location, job_url, updated_at, description
             FROM greenhouse_jobs
             ORDER BY updated_at DESC
             LIMIT 20;
         """)
         rows = cur.fetchall()
-        print("Rows fetched:", len(rows))
-        print("First row sample:", rows[0] if rows else None)
-
         cur.close()
         conn.close()
 
-        # Access values by key instead of index
         jobs = [
             {
                 "job_id": r["job_id"],
-                "company_name": r["company_name"],
+                "company": r["company_name"],
                 "title": r["title"],
                 "location": r["location"],
                 "job_url": r["job_url"],
-                "updated_at": str(r["updated_at"])
+                "updated_at": str(r["updated_at"]),
+                "description": r["description"],
             }
             for r in rows
         ]
@@ -84,6 +80,7 @@ def get_jobs():
     except Exception as e:
         print("ERROR:", e)
         return jsonify({"error": str(e)}), 500
+
 
 # 🔹 Root route for testing
 @app.route("/")
