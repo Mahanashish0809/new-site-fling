@@ -5,11 +5,6 @@ from urllib.parse import urlparse, urljoin
 from typing import Optional
 import re
 
-<<<<<<< HEAD
-###########################################################
-# WORKDAY (HTML fallback ONLY — API handles real scraping)
-###########################################################
-=======
 # -----------------------------------------------------------
 # Shared helpers
 # -----------------------------------------------------------
@@ -60,9 +55,8 @@ def remove_duplicates(jobs):
 # WORKDAY (HTML fallback ONLY)
 # -----------------------------------------------------------
 
->>>>>>> changes made to web scraper
 def extract_workday_jobs(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     jobs = []
 
     for a in soup.select("a[href*='/job/']"):
@@ -71,20 +65,10 @@ def extract_workday_jobs(html, base_url):
 
         if not title or not href:
             continue
-<<<<<<< HEAD
-
-        if href.startswith("/"):
-            href = base_url.rstrip("/") + href
-
-        jobs.append({"title": title, "url": href})
-
-    return jobs
-=======
         href = _abs_url(base_url, href)
         jobs.append({"title": title, "url": href})
 
     return remove_duplicates(jobs)
->>>>>>> changes made to web scraper
 
 
 # -----------------------------------------------------------
@@ -96,25 +80,11 @@ def extract_greenhouse_jobs(html, base_url):
     Handles standard Greenhouse job boards like:
     https://job-boards.greenhouse.io/reddit/
     """
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     jobs = []
 
-    # Typical Greenhouse markup:
-    # <a class="opening" href="/reddit/jobs/7449875">
-    #   <span class="title">Senior Software Engineer</span>
-    #   <span class="location">Remote - United States</span>
-    # </a>
     for a in soup.select("a.opening, div.opening a, a[href*='/jobs/']"):
         href = a.get("href")
-<<<<<<< HEAD
-
-        if not title or not href:
-            continue
-
-        jobs.append({"title": title, "url": href})
-
-    return jobs
-=======
         if not href:
             continue
         href = _abs_url(base_url, href)
@@ -137,11 +107,10 @@ def extract_greenhouse_jobs(html, base_url):
         })
 
     return remove_duplicates(jobs)
->>>>>>> changes made to web scraper
 
 
 def extract_greenhouse_job_details(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
 
     # Title from job page
     title_el = soup.select_one("h1.application-title, h1.app-title, h1.job-title, h1")
@@ -174,20 +143,11 @@ def extract_greenhouse_job_details(html, base_url):
 # -----------------------------------------------------------
 
 def extract_lever_jobs(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     jobs = []
 
     for a in soup.select("a[href*='jobs.lever.co']"):
         href = a.get("href")
-<<<<<<< HEAD
-
-        if not title or not href:
-            continue
-
-        jobs.append({"title": title, "url": href})
-
-    return jobs
-=======
         if not href:
             continue
         href = _abs_url(base_url, href)
@@ -206,11 +166,10 @@ def extract_lever_jobs(html, base_url):
         })
 
     return remove_duplicates(jobs)
->>>>>>> changes made to web scraper
 
 
 def extract_lever_job_details(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
 
     title_el = soup.select_one("h2.title, h1, h2")
     title = title_el.get_text(strip=True) if title_el else None
@@ -240,7 +199,7 @@ def extract_lever_job_details(html, base_url):
 # -----------------------------------------------------------
 
 def extract_oracle_jobs(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     jobs = []
 
     for tag in soup.select("[data-ph-at-id='job-title-text']"):
@@ -249,15 +208,6 @@ def extract_oracle_jobs(html, base_url):
         href = parent.get("href") if parent else None
         if not title or not href:
             continue
-<<<<<<< HEAD
-
-        if href.startswith("/"):
-            href = base_url.rstrip("/") + href
-
-        jobs.append({"title": title, "url": href})
-
-    return jobs
-=======
         href = _abs_url(base_url, href)
         company_name = _infer_company_from_url(href)
 
@@ -269,11 +219,10 @@ def extract_oracle_jobs(html, base_url):
         })
 
     return remove_duplicates(jobs)
->>>>>>> changes made to web scraper
 
 
 def extract_oracle_job_details(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
 
     title_el = soup.select_one("h1, h2")
     title = title_el.get_text(strip=True) if title_el else None
@@ -303,27 +252,17 @@ def extract_oracle_job_details(html, base_url):
 # -----------------------------------------------------------
 
 def extract_successfactors_jobs(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     jobs = []
 
-<<<<<<< HEAD
-    for a in soup.select("a[href*='career'], a[href*='careersection'], a[href*='jobId=']"):
-=======
     for a in soup.select(
         "a[href*='career'], a[href*='careersection'], a[href*='jobId=']"
     ):
->>>>>>> changes made to web scraper
         title = a.get_text(strip=True)
         href = a.get("href")
 
         if not title or not href:
             continue
-<<<<<<< HEAD
-
-        jobs.append({"title": title, "url": href})
-
-    return jobs
-=======
         href = _abs_url(base_url, href)
         company_name = _infer_company_from_url(href)
         jobs.append({
@@ -334,11 +273,10 @@ def extract_successfactors_jobs(html, base_url):
         })
 
     return remove_duplicates(jobs)
->>>>>>> changes made to web scraper
 
 
 def extract_successfactors_job_details(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
 
     title_el = soup.select_one("h1, h2")
     title = title_el.get_text(strip=True) if title_el else None
@@ -368,7 +306,7 @@ def extract_successfactors_job_details(html, base_url):
 # -----------------------------------------------------------
 
 def extract_icims_jobs(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     jobs = []
 
     for a in soup.select("a[href*='icims'][href*='jobs']"):
@@ -377,12 +315,6 @@ def extract_icims_jobs(html, base_url):
 
         if not title or not href:
             continue
-<<<<<<< HEAD
-
-        jobs.append({"title": title, "url": href})
-
-    return jobs
-=======
         href = _abs_url(base_url, href)
         company_name = _infer_company_from_url(href)
         jobs.append({
@@ -393,11 +325,10 @@ def extract_icims_jobs(html, base_url):
         })
 
     return remove_duplicates(jobs)
->>>>>>> changes made to web scraper
 
 
 def extract_icims_job_details(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
 
     title_el = soup.select_one("h1, h2")
     title = title_el.get_text(strip=True) if title_el else None
@@ -429,7 +360,7 @@ def extract_icims_job_details(html, base_url):
 # -----------------------------------------------------------
 
 def extract_smartrecruiters_jobs(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     jobs = []
 
     for a in soup.select("a[href*='smartrecruiters'][href*='job']"):
@@ -438,12 +369,6 @@ def extract_smartrecruiters_jobs(html, base_url):
 
         if not title or not href:
             continue
-<<<<<<< HEAD
-
-        jobs.append({"title": title, "url": href})
-
-    return jobs
-=======
         href = _abs_url(base_url, href)
         company_name = _infer_company_from_url(href)
         jobs.append({
@@ -454,11 +379,10 @@ def extract_smartrecruiters_jobs(html, base_url):
         })
 
     return remove_duplicates(jobs)
->>>>>>> changes made to web scraper
 
 
 def extract_smartrecruiters_job_details(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
 
     title_el = soup.select_one("h1, h2")
     title = title_el.get_text(strip=True) if title_el else None
@@ -488,32 +412,17 @@ def extract_smartrecruiters_job_details(html, base_url):
 # -----------------------------------------------------------
 
 def extract_workable_jobs(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     jobs = []
 
-<<<<<<< HEAD
-    for a in soup.select("a[href*='workable'][href*='apply'], a[href*='workable'][href*='job']"):
-=======
     for a in soup.select(
         "a[href*='workable'][href*='apply'], a[href*='workable'][href*='job']"
     ):
->>>>>>> changes made to web scraper
         title = a.get_text(strip=True)
         href = a.get("href")
 
         if not title or not href:
             continue
-<<<<<<< HEAD
-
-        jobs.append({"title": title, "url": href})
-
-    return jobs
-
-
-###########################################################
-# GENERIC FALLBACK EXTRACTOR
-###########################################################
-=======
         href = _abs_url(base_url, href)
         company_name = _infer_company_from_url(href)
         jobs.append({
@@ -527,7 +436,7 @@ def extract_workable_jobs(html, base_url):
 
 
 def extract_workable_job_details(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
 
     title_el = soup.select_one("h1, h2")
     title = title_el.get_text(strip=True) if title_el else None
@@ -556,9 +465,8 @@ def extract_workable_job_details(html, base_url):
 # GENERIC FALLBACK
 # -----------------------------------------------------------
 
->>>>>>> changes made to web scraper
 def extract_generic_jobs(html, base_url):
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")
     jobs = []
 
     # Broad job-like link detection
@@ -573,27 +481,7 @@ def extract_generic_jobs(html, base_url):
 
         if not title or not href:
             continue
-<<<<<<< HEAD
-
-        if href.startswith("/"):
-            href = base_url.rstrip("/") + href
-
-        jobs.append({"title": title, "url": href})
-
-    return remove_duplicates(jobs)
-
-
-###########################################################
-# HELPERS
-###########################################################
-def remove_duplicates(jobs):
-    seen = {}
-    for job in jobs:
-        seen[j["url"]] = job
-    return list(seen.values())
-=======
         href = _abs_url(base_url, href)
         jobs.append({"title": title, "url": href})
 
     return remove_duplicates(jobs)
->>>>>>> changes made to web scraper

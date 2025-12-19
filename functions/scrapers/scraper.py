@@ -2,20 +2,13 @@
 import asyncio
 import requests
 import re
-from playwright.async_api import async_playwright
-<<<<<<< HEAD
-from datetime import datetime, date
 import json
-
-# --- DB Connection ---
-from db import get_db_connection
-
-# --- Extractors ---
-=======
+from playwright.async_api import async_playwright
+from datetime import datetime, date, timedelta
 from urllib.parse import urlparse, urljoin
+from hashlib import md5
 from db import get_db_connection
 from collections.abc import Mapping
->>>>>>> changes made to web scraper
 from extractors import (
     extract_greenhouse_jobs,
     extract_lever_jobs,
@@ -24,17 +17,6 @@ from extractors import (
     extract_icims_jobs,
     extract_smartrecruiters_jobs,
     extract_workable_jobs,
-<<<<<<< HEAD
-    extract_generic_jobs
-=======
-    extract_greenhouse_job_details,
-    extract_lever_job_details,
-    extract_oracle_job_details,
-    extract_successfactors_job_details,
-    extract_icims_job_details,
-    extract_smartrecruiters_job_details,
-    extract_workable_job_details,
->>>>>>> changes made to web scraper
 )
 
 from universal_extractor import universal_extract
@@ -79,11 +61,6 @@ def title_matches(title: str) -> bool:
     return any(keyword in t for keyword in ALL_KEYWORDS)
 
 
-<<<<<<< HEAD
-# =====================================================================
-# DATABASE SAVE FUNCTION (WORKDAY + GREENHOUSE + ALL ATS)
-# =====================================================================
-=======
 # -----------------------------------------------------------
 # Helper: deterministic job ID
 # -----------------------------------------------------------
@@ -97,7 +74,6 @@ def make_job_id(source: str, key: str) -> int:
 # Save jobs to PostgreSQL
 # -----------------------------------------------------------
 
->>>>>>> changes made to web scraper
 def save_jobs_to_db(job_list):
     if not job_list:
         print("No jobs to save")
@@ -110,12 +86,6 @@ def save_jobs_to_db(job_list):
         INSERT INTO greenhouse_jobs (
             job_id, company_name, title, location, job_url, updated_at, raw_data, description
         )
-<<<<<<< HEAD
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT (job_id) DO UPDATE SET
-            updated_at = EXCLUDED.updated_at,
-            raw_data = EXCLUDED.raw_data;
-=======
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
         ON CONFLICT (job_id) DO UPDATE SET
             company_name = EXCLUDED.company_name,
@@ -125,13 +95,10 @@ def save_jobs_to_db(job_list):
             updated_at   = EXCLUDED.updated_at,
             raw_data     = EXCLUDED.raw_data,
             description  = EXCLUDED.description;
->>>>>>> changes made to web scraper
     """
 
+    saved = 0
     for job in job_list:
-<<<<<<< HEAD
-        job_id = job.get("job_id") or job.get("id")
-=======
         # 1. job_id
         job_id = job.get("job_id")
         if not job_id:
@@ -149,22 +116,10 @@ def save_jobs_to_db(job_list):
         else:
             updated_at = datetime.utcnow()
 
->>>>>>> changes made to web scraper
         company = job.get("company_name", "Unknown")
         title = job.get("title")
         location = job.get("location", "N/A")
         job_url = job.get("url")
-<<<<<<< HEAD
-        updated_at = job.get("posted_on") or job.get("updated_at")
-        raw_json = json.dumps(job)
-
-        try:
-            cur.execute(query, (
-                job_id, company, title, location, job_url, updated_at, raw_json
-            ))
-        except Exception as e:
-            print("DB Insert Error:", e)
-=======
         description = job.get("description") or "No description provided."
         raw_json = json.dumps(job, default=str)
 
@@ -187,136 +142,12 @@ def save_jobs_to_db(job_list):
             print("DB error:", e)
             print("Failed job:", job)
             conn.rollback()
->>>>>>> changes made to web scraper
             continue
 
     conn.commit()
     cur.close()
     conn.close()
-<<<<<<< HEAD
-
-    print(f"✅ Saved {len(job_list)} jobs to AWS PostgreSQL.")
-
-
-# =====================================================================
-#   WORKDAY SCRAPER — ONLY "POSTED TODAY"
-# =====================================================================
-async def scrape_workday_api(url):
-    print("Using Workday DETAIL-PAGE scraper (FINAL)...")
-=======
     print(f"Saved {saved} jobs to AWS Postgresql")
-
-
-# -----------------------------------------------------------
-# WORKDAY NETWORK INTERCEPT SCRAPER
-# -----------------------------------------------------------
-
-async def scrape_workday_api(url: str):
-    print("Using Workday NETWORK INTERCEPT scraper (last 24h)...")
->>>>>>> changes made to web scraper
-
-    parts = url.split("/")
-    host = parts[2]
-
-    job_urls = []
-    today_jobs = []
-
-    # ------------------------------------------------------
-    # STEP 1 — Get all job detail URLs (scrolling page)
-    # ------------------------------------------------------
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-
-<<<<<<< HEAD
-        print("➡ Opening Workday job listing page...")
-        await page.goto(url, timeout=60000)
-=======
-        async def capture(resp):
-            if "/jobPostings" in resp.url or resp.url.endswith("/jobs"):
-                try:
-                    data = await resp.json()
-                    posts = data.get("jobPostings", [])
-                    if posts:
-                        print(f"Intercepted {len(posts)} Workday jobs")
-                        job_posts.extend(posts)
-                except Exception:
-                    pass
-
-        page.on("response", lambda r: asyncio.create_task(capture(r)))
-
-        await page.goto(url, timeout=120000)
->>>>>>> changes made to web scraper
-        await page.wait_for_load_state("networkidle")
-
-        # Scroll to load more
-        print("➡ Scrolling...")
-        for _ in range(40):
-            await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
-            await page.wait_for_timeout(300)
-
-        print("➡ Extracting job URLs from DOM...")
-
-        hrefs = await page.eval_on_selector_all(
-            "a[href*='/job/']",
-            "els => els.map(e => e.getAttribute('href'))"
-        )
-
-        await browser.close()
-
-<<<<<<< HEAD
-    # Convert relative → absolute
-    for h in hrefs:
-        if h.startswith("/"):
-            full = f"https://{host}{h}"
-        else:
-            full = h
-=======
-    print(f"TOTAL RAW WORKDAY JOBS: {len(job_posts)}")
->>>>>>> changes made to web scraper
-
-        if full not in job_urls:
-            job_urls.append(full)
-
-<<<<<<< HEAD
-    print(f"📌 Total Workday job URLs found: {len(job_urls)}")
-=======
-    for job in job_posts:
-        posted = job.get("postedOn")
-        if not posted:
-            continue
-
-        try:
-            dt = datetime.fromisoformat(posted.replace("Z", "+00:00"))
-        except Exception:
-            continue
-
-        if dt < last24:
-            continue
-
-        title = job.get("title") or ""
-        if not title_matches(title):
-            continue  # filter by keywords
-
-        path = job.get("externalPath", "")
-        job_url = f"https://{host}{path}"
-
-        job_id = make_job_id("workday", path)
-
-        final.append(
-            {
-                "job_id": job_id,
-                "company_name": host.split(".")[0],
-                "title": title,
-                "location": job.get("locationsText", "N/A"),
-                "posted_on": posted,
-                "url": job_url,
-                "raw": job,
-            }
-        )
-
-    print(f"WORKDAY JOBS LAST 24H (filtered): {len(final)}")
-    return final
 
 
 # -----------------------------------------------------------
@@ -377,189 +208,84 @@ def extract_by_platform(platform, html, url):
 
 
 # -----------------------------------------------------------
-# Extract job's details
+# WORKDAY NETWORK INTERCEPT SCRAPER
 # -----------------------------------------------------------
 
-def extract_job_details(platform: str, html: str, url: str) -> dict:
-    base_url = get_base_url(url)
-    try:
-        if platform == "greenhouse":
-            return extract_greenhouse_job_details(html, base_url)
-        if platform == "lever":
-            return extract_lever_job_details(html, base_url)
-        if platform == "oracle":
-            return extract_oracle_job_details(html, base_url)
-        if platform == "successfactors":
-            return extract_successfactors_job_details(html, base_url)
-        if platform == "icims":
-            return extract_icims_job_details(html, base_url)
-        if platform == "smartrecruiters":
-            return extract_smartrecruiters_job_details(html, base_url)
-        if platform == "workable":
-            return extract_workable_job_details(html, base_url)
+async def scrape_workday_api(url: str):
+    print("Using Workday NETWORK INTERCEPT scraper (last 24h)...")
 
-        res = universal_extract(html, base_url)
+    parts = url.split("/")
+    host = parts[2]
 
-        if isinstance(res, Mapping):
-            return res
-        if isinstance(res, list):
-            return res[0] if res else {}
-        return {}
-    except Exception as e:
-        print("Job details extractor error:", e)
-        return {}
+    job_posts = []
+    last24 = datetime.utcnow() - timedelta(hours=24)
 
-
-# -----------------------------------------------------------
-# UNIVERSAL ADVANCED PLAYWRIGHT SCRAPER
-# -----------------------------------------------------------
-
-async def playwright_scrape_universal(url):
-    print("Using UNIVERSAL PLAYWRIGHT SCRAPER...")
-
-    extracted = []
-    network_jobs = []
->>>>>>> changes made to web scraper
-
-    # ------------------------------------------------------
-    # STEP 2 — Visit each job page and detect posted date
-    # ------------------------------------------------------
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context()
+        page = await browser.new_page()
 
-        for job_url in job_urls:
-            page = await context.new_page()
-            await page.goto(job_url, timeout=60000)
-            await page.wait_for_load_state("networkidle")
-
-            text = await page.inner_text("body")
-
-            match = re.search(r"Posted[: ]+([A-Za-z0-9 ,]+)", text)
-            if not match:
-                await page.close()
-                continue
-
-            posted_value = match.group(1).lower().strip()
-
-            # Keyword check
-            quick_terms = ["today", "just posted", "hour", "minutes"]
-            if any(k in posted_value for k in quick_terms):
-                today_jobs.append({
-                    "job_id": hash(job_url),
-                    "company_name": host.split(".")[0],
-                    "title": await page.title(),
-                    "url": job_url,
-                    "posted_on": posted_value
-                })
-                await page.close()
-                continue
-
-            # Exact date check
-            try:
-<<<<<<< HEAD
-                dt = datetime.strptime(posted_value, "%B %d, %Y").date()
-                if dt == date.today():
-                    today_jobs.append({
-                        "job_id": hash(job_url),
-                        "company_name": host.split(".")[0],
-                        "title": await page.title(),
-                        "url": job_url,
-                        "posted_on": posted_value
-                    })
-            except:
-=======
-                if "job" in resp.url.lower() or "career" in resp.url.lower():
+        async def capture(resp):
+            if "/jobPostings" in resp.url or resp.url.endswith("/jobs"):
+                try:
                     data = await resp.json()
-                    if isinstance(data, dict):
-                        for k, v in data.items():
-                            if isinstance(v, list) and len(v) > 0:
-                                if isinstance(v[0], dict):
-                                    print(f"Network jobs from {resp.url}")
-                                    network_jobs.extend(v)
-            except Exception:
->>>>>>> changes made to web scraper
-                pass
+                    posts = data.get("jobPostings", [])
+                    if posts:
+                        print(f"Intercepted {len(posts)} Workday jobs")
+                        job_posts.extend(posts)
+                except Exception:
+                    pass
 
-            await page.close()
+        page.on("response", lambda r: asyncio.create_task(capture(r)))
+
+        await page.goto(url, timeout=120000)
+        await page.wait_for_load_state("networkidle")
+
+        # Scroll to load more
+        print("➡ Scrolling...")
+        for _ in range(40):
+            await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
+            await page.wait_for_timeout(300)
 
         await browser.close()
 
-<<<<<<< HEAD
-    print(f"🎉 TODAY'S WORKDAY JOBS: {len(today_jobs)}")
-    return today_jobs
+    print(f"TOTAL RAW WORKDAY JOBS: {len(job_posts)}")
 
-
-# =====================================================================
-# DETECT ATS PLATFORM
-# =====================================================================
-def detect_platform(url):
-    url = url.lower()
-
-    if "myworkdayjobs" in url: return "workday"
-    if "greenhouse.io" in url: return "greenhouse"
-    if "jobs.lever.co" in url: return "lever"
-    if "oraclecloud" in url: return "oracle"
-    if "successfactors" in url: return "successfactors"
-    if "icims" in url: return "icims"
-    if "smartrecruiters" in url: return "smartrecruiters"
-    if "workable" in url: return "workable"
-
-    return "universal"
-
-
-# =====================================================================
-# SCRAPER ROUTER FOR NON-WORKDAY SITES
-# =====================================================================
-def extract_by_platform(platform, html, url):
-    if platform == "greenhouse": return extract_greenhouse_jobs(html, url)
-    if platform == "lever": return extract_lever_jobs(html, url)
-    if platform == "oracle": return extract_oracle_jobs(html, url)
-    if platform == "successfactors": return extract_successfactors_jobs(html, url)
-    if platform == "icims": return extract_icims_jobs(html, url)
-    if platform == "smartrecruiters": return extract_smartrecruiters_jobs(html, url)
-    if platform == "workable": return extract_workable_jobs(html, url)
-
-    return universal_extract(html, url)
-
-
-# =====================================================================
-# UNIVERSAL SCRAPER ENTRY POINT
-# =====================================================================
-async def scrape_url(url):
-    platform = detect_platform(url)
-=======
     final = []
+    for job in job_posts:
+        posted = job.get("postedOn")
+        if not posted:
+            continue
 
-    # Add DOM extracted jobs (filtered by title)
-    for job in extracted:
+        try:
+            dt = datetime.fromisoformat(posted.replace("Z", "+00:00"))
+        except Exception:
+            continue
+
+        if dt < last24:
+            continue
+
         title = job.get("title") or ""
         if not title_matches(title):
-            continue
-        if "url" not in job:
-            continue
-        job["job_id"] = make_job_id("dom", job["url"])
-        final.append(job)
+            continue  # filter by keywords
 
-    # Add network JSON jobs (filtered by title)
-    for job in network_jobs:
-        title = job.get("title") or ""
-        if not title_matches(title):
-            continue
-        job_id = job.get("id") or make_job_id("net", json.dumps(job))
+        path = job.get("externalPath", "")
+        job_url = f"https://{host}{path}"
+
+        job_id = make_job_id("workday", path)
+
         final.append(
             {
                 "job_id": job_id,
-                "title": title or "Unknown",
-                "url": job.get("url") or url,
-                "company_name": job.get("company") or "Unknown",
-                "location": job.get("location", "N/A"),
-                "posted_on": job.get("updated_at") or datetime.utcnow().isoformat(),
+                "company_name": host.split(".")[0],
+                "title": title,
+                "location": job.get("locationsText", "N/A"),
+                "posted_on": posted,
+                "url": job_url,
                 "raw": job,
             }
         )
 
-    print(f"UNIVERSAL SCRAPER TOTAL JOBS (filtered): {len(final)}")
+    print(f"WORKDAY JOBS LAST 24H (filtered): {len(final)}")
     return final
 
 
@@ -594,7 +320,6 @@ async def scrape_url(url: str):
     platform = detect_platform(url)
     print(f"[SCRAPER] Platform = {platform}")
     print(f"URL: {url}")
->>>>>>> changes made to web scraper
 
     # WORKDAY
     if platform == "workday":
@@ -603,69 +328,34 @@ async def scrape_url(url: str):
         return jobs
 
     # STATIC HTML SCRAPE
+    jobs = []
     try:
         html = requests.get(url, timeout=15).text
-<<<<<<< HEAD
-        jobs = extract_by_platform(platform, html, url)
-        if jobs:
-            save_jobs_to_db(jobs)
-            return jobs
-    except:
-        pass
-=======
         jobs = extract_by_platform(platform, html, url) or []
         # Filter by title keywords here too
         jobs = [j for j in jobs if title_matches(j.get("title", ""))]
     except Exception as e:
         print("Static scrape error:", e)
         jobs = []
->>>>>>> changes made to web scraper
 
-    # PLAYWRIGHT SCRAPE
-    try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
+    # If no jobs from static, try PLAYWRIGHT SCRAPE
+    if not jobs:
+        try:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True)
+                page = await browser.new_page()
+                await page.goto(url, timeout=60000)
+                await page.wait_for_load_state("networkidle")
+                html = await page.content()
+                await browser.close()
 
-<<<<<<< HEAD
-            await page.goto(url, timeout=60000)
-            await page.wait_for_load_state("networkidle")
+                jobs = extract_by_platform(platform, html, url) or []
+                jobs = [j for j in jobs if title_matches(j.get("title", ""))]
+        except Exception as e:
+            print("Playwright scrape error:", e)
+            jobs = []
 
-            html = await page.content()
-            await browser.close()
-
-            jobs = extract_by_platform(platform, html, url)
-            save_jobs_to_db(jobs)
-            return jobs
-
-    except:
-        return []
-
-    return []
-if __name__ == "__main__":
-    companies_to_scrape = [
-        "coinbase", "stripe", "notion", "airbnb", "uber", "lyft", 
-        "figma", "plaid", "brex", "canva"
-    ]
-    
-    all_jobs = []
-    
-    print("--- Starting Job Fetch ---")
-    for company in companies_to_scrape:
-        print(f"Fetching jobs for: {company}...")
-        jobs = fetch_greenhouse_jobs(company)
-        if jobs:
-            all_jobs.extend(jobs)
-    print("--- Job Fetch Complete ---\n")
-    
-    all_jobs.sort(key=lambda x: x.get('updated_at', ''), reverse=True)
-
-    display_jobs(all_jobs, limit=10)
-
-    save_jobs_to_db(all_jobs)   # <-- ADD THIS HERE
-    display_jobs(all_jobs, limit=10)
-=======
-    # Fetch Jobs for Each URL
+    # Fetch details for each job
     detailed_jobs = []
     for job in jobs:
         job_url = job.get("url")
@@ -681,7 +371,15 @@ if __name__ == "__main__":
 
         details = {}
         if job_html:
-            details = extract_job_details(platform, job_html, job_url) or {}
+            # Try to extract more details from individual job page
+            try:
+                details = universal_extract(job_html, get_base_url(job_url))
+                if isinstance(details, list) and details:
+                    details = details[0]
+                elif not isinstance(details, dict):
+                    details = {}
+            except Exception:
+                details = {}
 
         merged = merge_job(job, details)
 
@@ -692,7 +390,7 @@ if __name__ == "__main__":
         candidate = host_parts[0] if host_parts else "Unknown"
         if candidate in ("www", "jobs", "careers", "apply") and len(host_parts) > 1:
             candidate = host_parts[1]
-        merged["company_name"] = candidate or "Unknown"
+        merged["company_name"] = merged.get("company_name") or candidate or "Unknown"
 
         detailed_jobs.append(merged)
 
@@ -700,4 +398,3 @@ if __name__ == "__main__":
     save_jobs_to_db(detailed_jobs)
 
     return detailed_jobs
->>>>>>> changes made to web scraper

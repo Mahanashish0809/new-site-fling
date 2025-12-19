@@ -51,6 +51,14 @@ router.post("/firebase-login", async (req, res) => {
     const { token } = req.body;
     if (!token) return res.status(400).json({ error: "Missing token" });
 
+    // Check if Firebase Admin is initialized
+    if (!admin.apps.length) {
+      return res.status(503).json({ 
+        error: "Firebase Admin not configured. Please set FIRE_SERVICE_ACCOUNT or GOOGLE_APPLICATION_CREDENTIALS environment variable.",
+        hint: "Download your Firebase service account JSON from Firebase Console > Project Settings > Service Accounts"
+      });
+    }
+
     // Verify Firebase ID token
     const decoded = await admin.auth().verifyIdToken(token);
     const email = decoded.email;
