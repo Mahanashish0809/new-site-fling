@@ -1,13 +1,14 @@
+import dotenv from "dotenv";
+dotenv.config(); // Must be called BEFORE importing modules that use env vars
+
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import admin from "./firebaseAdmin.js";
 import authRoutes from "./routes/auth.js";
 import * as functions from "firebase-functions";
 import { onRequest } from "firebase-functions/v2/https";
 import scrapeRoutes from "./routes/scrape.js";
-
-dotenv.config();
+import jobsRoutes from "./routes/jobs.js";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/scrape", scrapeRoutes);
+app.use("/api/jobs", jobsRoutes);
 
 // ---- LOCAL DEVELOPMENT ONLY ----
 if (!process.env.FUNCTIONS_EMULATOR) {

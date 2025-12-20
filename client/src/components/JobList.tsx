@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {JobCard, Job } from "./JobCard";
+import { JobCard, Job } from "./JobCard";
 
 interface JobListProps {
   filters: {
@@ -18,7 +18,7 @@ const JobList: React.FC<JobListProps> = ({ filters }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/jobs")
+    fetch(`http://localhost:5001/api/jobs`)
       .then((res) => res.json())
       .then((data) => {
         let rawJobs: any[] = [];
@@ -29,19 +29,18 @@ const JobList: React.FC<JobListProps> = ({ filters }) => {
 
         // Map backend → JobCard interface
         const mappedJobs: Job[] = rawJobs.map((r: any) => ({
-          id: String(r.job_id),
-          title: r.title,
-          company: r.company_name,
-          location: r.location,
+          id: String(r.job_id ?? r.id),
+          title: r.title ?? "Unknown",
+          company: r.company ?? "Unknown company",
+          location: r.location ?? "Location not specified",
 
-          // Fields backend doesn't provide → fallback values
           category: "General",
           type: "Full-Time",
           salary: "Not specified",
           posted: r.updated_at,
-          description: "No description provided.",
+          description: r.description || "No description provided.",
           featured: false,
-          logo: r.company_name ? r.company_name[0].toUpperCase() : "",
+          logo: (r.company || "?")[0].toUpperCase(),
           mode: "On-site",
           experience: "Any",
         }));
@@ -59,11 +58,12 @@ const JobList: React.FC<JobListProps> = ({ filters }) => {
     const keywordMatch =
       !filters.keyword ||
       job.title.toLowerCase().includes(filters.keyword.toLowerCase()) ||
-      job.company.toLowerCase().includes(filters.keyword.toLowerCase());
+      (job.company || "").toLowerCase().includes(filters.keyword.toLowerCase());
 
     const locationMatch =
       !filters.location ||
-      job.location.toLowerCase().includes(filters.location.toLowerCase());
+      (job.location || "").toLowerCase().includes(filters.location.toLowerCase());
+
 
     return keywordMatch && locationMatch;
   });

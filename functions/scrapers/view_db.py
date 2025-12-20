@@ -5,7 +5,11 @@ from db import get_db_connection
 conn = get_db_connection()
 cur = conn.cursor()
 
+<<<<<<< HEAD
 cur.execute("SELECT job_id, company_name, title, location, job_url, updated_at FROM greenhouse_jobs ORDER BY updated_at DESC LIMIT 20;")
+=======
+cur.execute("SELECT job_id, company_name, title, location, job_url, updated_at, description FROM greenhouse_jobs ORDER BY updated_at DESC LIMIT 20;")
+>>>>>>> origin/main
 rows = cur.fetchall()
 
 print("\n=== JOBS IN DATABASE ===\n")
