@@ -44,4 +44,19 @@ router.post("/save", async (req, res) => {
     }
 });
 
+router.post("/run", async (req, res) => {
+  try {
+    const secret = req.headers["x-cron-secret"];
+    if (secret !== process.env.CRON_SECRET) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const result = await runAllScrapers(); // runs greenhouse/workday/lever etc.
+    return res.status(200).json({ ok: true, result });
+  } catch (e) {
+    console.error("Scrape run failed:", e);
+    return res.status(500).json({ ok: false, error: "Scrape failed" });
+  }
+});
+
 export default router;
